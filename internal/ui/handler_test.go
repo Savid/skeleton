@@ -32,6 +32,8 @@ func TestHandler(t *testing.T) {
 		{name: "directory falls back to index", path: "/assets/nested", status: http.StatusOK, body: "<title>app</title>", cache: "no-cache"},
 		{name: "fingerprinted asset is immutable", path: "/assets/app-1.js", status: http.StatusOK, body: "console.log(1)", cache: "public, max-age=31536000, immutable"},
 		{name: "static file", path: "/favicon.svg", status: http.StatusOK, body: "<svg/>"},
+		{name: "missing file is not the app", path: "/favicon.ico", status: http.StatusNotFound},
+		{name: "missing nested file is not the app", path: "/assets/gone.js", status: http.StatusNotFound},
 		{name: "unknown api path is not the app", path: "/api/v1/missing", status: http.StatusNotFound},
 		{name: "api root is not the app", path: "/api", status: http.StatusNotFound},
 	}

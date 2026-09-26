@@ -14,7 +14,8 @@ import (
 
 // Handler serves files from assets and falls back to index.html for any
 // other non-API path, so client-side routes work on reload. Paths under
-// /api/ are never answered with the app.
+// /api/ are never answered with the app, and neither is a path that names a
+// file (it has an extension): a missing asset is a 404, not the app.
 func Handler(assets fs.FS) (http.Handler, error) {
 	index, err := fs.ReadFile(assets, "index.html")
 	if err != nil {
@@ -46,6 +47,12 @@ func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	f, err := h.assets.Open(name)
 	if err != nil {
+		if path.Ext(name) != "" {
+			http.NotFound(w, r)
+
+			return
+		}
+
 		h.serveIndex(w, r)
 
 		return
