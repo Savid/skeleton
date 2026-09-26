@@ -1,0 +1,17 @@
+{
+  "name": "skeleton-workspace",
+  "private": true,
+  "packageManager": "pnpm@11.22.0",
+  "scripts": {
+    "knip": "knip",
+    "lint:api": "redocly lint api/openapi.yaml --config .redocly.yaml"
+  },
+  "devDependencies": {
+    "@redocly/cli": "2.54.2",
+    "knip": "5.88.1"
+  },
+  "volta": {
+    "node": "24.19.0",
+    "pnpm": "11.22.0"
+  }
+}

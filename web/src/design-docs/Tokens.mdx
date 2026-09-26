@@ -1,0 +1,35 @@
+import { Meta, ColorPalette, ColorItem } from '@storybook/addon-docs/blocks';
+
+<Meta title="Design/Tokens" />
+
+# Tokens
+
+Components use these semantic names as Tailwind classes (`bg-surface`,
+`text-muted`, `border-border`, …), never raw palette classes or hex values.
+They are defined once in `src/index.css`.
+
+<ColorPalette>
+  <ColorItem
+    title="Surfaces"
+    subtitle="background, surface, border"
+    colors={{
+      background: 'var(--color-background)',
+      surface: 'var(--color-surface)',
+      border: 'var(--color-border)',
+    }}
+  />
+  <ColorItem
+    title="Text"
+    subtitle="foreground, muted, accent"
+    colors={{
+      foreground: 'var(--color-foreground)',
+      muted: 'var(--color-muted)',
+      accent: 'var(--color-accent)',
+    }}
+  />
+  <ColorItem
+    title="Status"
+    subtitle="ok, warn, danger"
+    colors={{ ok: 'var(--color-ok)', warn: 'var(--color-warn)', danger: 'var(--color-danger)' }}
+  />
+</ColorPalette>

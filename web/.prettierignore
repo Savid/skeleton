@@ -1,0 +1,6 @@
+dist
+node_modules
+storybook-static
+src/routeTree.gen.ts
+.storybook/public
+embed.go

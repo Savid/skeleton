@@ -1,0 +1,22 @@
+# Build output
+/build/
+/web/dist/
+
+# Go
+*.test
+*.out
+go.work
+go.work.sum
+
+# Node
+node_modules/
+*.tsbuildinfo
+
+# Editors and OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Storybook
+/web/storybook-static/

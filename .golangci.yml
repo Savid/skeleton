@@ -1,0 +1,110 @@
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  default: none
+  enable:
+    - bidichk
+    - bodyclose
+    - copyloopvar
+    - cyclop
+    - dupword
+    - errcheck
+    - errname
+    - errorlint
+    - exhaustive
+    - exptostd
+    - fatcontext
+    - funlen
+    - gocognit
+    - gocritic
+    - gosec
+    - govet
+    - ineffassign
+    - intrange
+    - misspell
+    - modernize
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - perfsprint
+    - predeclared
+    - revive
+    - sloglint
+    - staticcheck
+    - tagliatelle
+    - tparallel
+    - unconvert
+    - usetesting
+    - unparam
+    - unused
+    - usestdlibvars
+    - wastedassign
+    - whitespace
+
+  settings:
+    cyclop:
+      max-complexity: 30
+
+    funlen:
+      lines: 100
+      statements: 50
+
+    gocognit:
+      min-complexity: 20
+
+    errcheck:
+      check-type-assertions: true
+
+    tagliatelle:
+      case:
+        rules:
+          yaml: kebab
+          json: camel
+
+    revive:
+      rules:
+        - name: unexported-return
+          disabled: true
+        - name: exported
+
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
+      settings:
+        shadow:
+          strict: true
+
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+
+    # Loggers are injected, never global; use the Context variants when a
+    # context is in scope.
+    sloglint:
+      no-global: all
+      context: scope
+
+    staticcheck:
+      checks:
+        - all
+
+  exclusions:
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    goimports:
+      local-prefixes:
+        - github.com/savid/skeleton

@@ -1,0 +1,30 @@
+@import 'tailwindcss';
+
+/* Semantic tokens. Components use these names (bg-surface, text-muted, …),
+ * never raw palette colours, so the theme can change in one place. */
+@theme {
+  --color-background: #0b0d12;
+  --color-surface: #13161e;
+  --color-border: #262b36;
+  --color-foreground: #e6e8ee;
+  --color-muted: #8b93a7;
+  --color-accent: #f5b83d;
+  --color-ok: #4ade80;
+  --color-warn: #fbbf24;
+  --color-danger: #f87171;
+
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, monospace;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}

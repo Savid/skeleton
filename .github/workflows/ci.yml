@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+env:
+  GOWORK: 'off'
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint:api
+      # Generated code is committed; it must match what the spec produces.
+      - run: make generate-check
+
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - run: make web-placeholder
+      - uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.12.2
+      - run: go test -race ./...
+
+  web:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: package.json
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --dir web lint
+      - run: pnpm --dir web typecheck
+      - run: pnpm --dir web format:check
+      - run: pnpm knip
+      - run: pnpm --dir web exec playwright install --with-deps chromium
+      - run: pnpm --dir web test
+      - run: pnpm --dir web build
+      - run: pnpm --dir web build-storybook

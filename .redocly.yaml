@@ -1,0 +1,11 @@
+# Lints api/openapi.yaml: `make lint-api`.
+extends:
+  - recommended
+
+rules:
+  tag-description: error
+  no-unused-components: error
+  no-server-example.com: error
+  # Reads without parameters have no client error to describe; `default`
+  # covers every other failure.
+  operation-4xx-response: off

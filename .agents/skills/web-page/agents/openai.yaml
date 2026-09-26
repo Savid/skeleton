@@ -1,0 +1,4 @@
+interface:
+  display_name: "Add a web page"
+  short_description: "Route, page, nav link and tests for the web UI"
+  default_prompt: "Use $web-page to add a /sessions page that lists sessions."

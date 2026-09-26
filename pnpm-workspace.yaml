@@ -1,0 +1,7 @@
+packages:
+  - web
+
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true
+  msw: true

@@ -1,0 +1,8 @@
+**/node_modules
+.git
+.github
+.agents
+.claude
+build
+web/dist
+web/storybook-static
