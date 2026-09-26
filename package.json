@@ -1,7 +1,7 @@
 {
   "name": "skeleton-workspace",
   "private": true,
-  "packageManager": "pnpm@11.22.0",
+  "packageManager": "pnpm@12.6.0",
   "scripts": {
     "knip": "knip",
     "lint:api": "redocly lint api/openapi.yaml --config .redocly.yaml"
@@ -12,6 +12,6 @@
   },
   "volta": {
     "node": "24.21.0",
-    "pnpm": "11.22.0"
+    "pnpm": "12.6.0"
   }
 }

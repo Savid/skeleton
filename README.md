@@ -32,8 +32,12 @@ What is in the box:
 
 ## Quick start
 
-Needs Go 1.27 and golangci-lint 2.14 (`.tool-versions`), and node 24 with
-pnpm 11 (pinned through volta in `package.json`).
+Needs Go 1.27 and golangci-lint 2.14 (`.tool-versions`), and Node 24 with
+pnpm 12. Both are pinned in `package.json` twice: the `volta` field for
+[Volta](https://volta.sh) users, whose shims pick them up automatically, and
+`packageManager` for [Corepack](https://nodejs.org/api/corepack.html)
+(`corepack enable` once), which is what the Dockerfile and CI use. Keep the
+two in step when bumping either.
 
 ```bash
 pnpm install
