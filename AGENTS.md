@@ -60,6 +60,8 @@ make storybook        # component explorer on :6006
   problems (`application/problem+json`).
 - Loggers are injected `*slog.Logger`s, never the global one; use the
   `…Context` methods when a context is in scope (`sloglint` enforces both).
+  Inside a request that context carries the request ID, and the server's
+  logger adds it to every line, so never log the ID by hand.
 - Time is injected where a test needs to control it (`Config.Now`), never
   read from `time.Now` inside a handler. Times in the API are UTC: the
   generated client's Zod schemas accept only the `Z` suffix.

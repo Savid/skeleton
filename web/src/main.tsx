@@ -7,7 +7,11 @@ import { ErrorPage } from '@/pages/error/ErrorPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import './index.css';
 
-const queryClient = new QueryClient();
+// The event stream writes fresh values into the cache, so a remount or a
+// window focus within staleTime reads the cache instead of refetching. Queries
+// the stream does not cover still refetch once older than this, and a page can
+// set its own staleTime or refetchInterval where it wants different behaviour.
+const queryClient = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } });
 
 const router = createRouter({
   routeTree,

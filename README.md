@@ -12,6 +12,9 @@ What is in the box:
   TanStack Query options) are generated from it with `make generate`, and CI
   fails when the committed output is stale. Errors are RFC 9457 problems. The
   daemon serves the spec at `/openapi.yaml`.
+- **Requests.** Every request gets an ID (`X-Request-Id`, the proxy's when it
+  sent one) that is echoed in the response and attached to every log line the
+  handler writes, plus an access log at debug level, warn on server errors.
 - **Event stream.** ogen cannot serve `text/event-stream`, so `streamEvents` is
   declared in the spec and hand-routed; a contract test checks every operation
   in the spec is served with the content type it declares. The UI opens the

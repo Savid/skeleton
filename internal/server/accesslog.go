@@ -8,7 +8,8 @@ import (
 
 // accessLog logs one line per request at debug level, and at warn for
 // server errors. Event streams are logged when they end, with their
-// duration. Wrap the whole mux so hand-routed handlers are covered too.
+// duration. It runs inside withRequestID, so each line carries the request
+// ID. Wrap the whole mux so hand-routed handlers are covered too.
 func accessLog(log *slog.Logger, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

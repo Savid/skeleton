@@ -59,6 +59,8 @@ type Server struct {
 // catch-all; ServeMux sends each request to its most specific pattern.
 func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	cfg = cfg.withDefaults()
+	// Every line the server logs inside a request carries that request's ID.
+	log = slog.New(requestIDHandler{log.Handler()})
 	s := &Server{log: log, cfg: cfg, shutdown: make(chan struct{})}
 	s.ops = &operations{log: log, version: cfg.Version, now: cfg.Now}
 
@@ -92,7 +94,7 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	mux.Handle("/", app)
 
 	s.http = &http.Server{
-		Handler:           accessLog(log, mux),
+		Handler:           withRequestID(accessLog(log, mux)),
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       2 * time.Minute,
 		// No WriteTimeout: event streams are long-lived and bound each write

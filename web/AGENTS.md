@@ -47,6 +47,8 @@ Versions are pinned in `package.json` and the lockfile.
   spec and run `pnpm generate:api`. `src/lib/api-client.ts` configures it.
 - Server data: `useQuery(getXOptions(...))` from `@/api/@tanstack/react-query.gen`,
   types from `@/api`, schemas from `@/api/zod.gen`. Components never call `fetch`.
+  The client's default `staleTime` is 30 s because the stream keeps the cache
+  fresh; a query the stream does not cover sets its own `refetchInterval`.
 - Event streams are hand-routed, so they have no generated hook.
   `useEventStream` (mounted once, in `__root.tsx`) opens the `EventSource`,
   validates each event with the generated Zod schema, and writes it into the

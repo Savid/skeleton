@@ -82,6 +82,16 @@ func TestRoutes(t *testing.T) {
 	}
 }
 
+// Every response carries a request ID, which a proxy in front may supply.
+func TestResponsesCarryRequestID(t *testing.T) {
+	t.Parallel()
+
+	rec := get(t, newTestServer(t).Handler(), http.MethodGet, "/api/v1/health")
+	if rec.Header().Get(requestIDHeader) == "" {
+		t.Error("health response has no request ID")
+	}
+}
+
 func TestProblemBody(t *testing.T) {
 	t.Parallel()
 
