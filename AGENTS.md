@@ -58,6 +58,8 @@ make storybook        # component explorer on :6006
   `TestEveryOperationIsServed` fails if any operation is not served.
 - Routes live under `/api/v1/`; JSON fields are camelCase; errors are RFC 9457
   problems (`application/problem+json`).
+- `getConfig` is public and is injected into `index.html`; nothing in it may
+  be a secret or need authentication.
 - Loggers are injected `*slog.Logger`s, never the global one; use the
   `…Context` methods when a context is in scope (`sloglint` enforces both).
   Inside a request that context carries the request ID, and the server's

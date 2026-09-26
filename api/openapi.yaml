@@ -31,6 +31,25 @@ paths:
                 $ref: '#/components/schemas/Health'
         default:
           $ref: '#/components/responses/Problem'
+  /api/v1/config:
+    get:
+      operationId: getConfig
+      tags: [system]
+      summary: Read the public configuration
+      description: >-
+        What the UI needs before it can render: the daemon's name and build.
+        The same object is injected into `index.html` as `window.__CONFIG__`,
+        so the first render does not wait for this request; the UI reads it
+        from there and refetches later.
+      responses:
+        '200':
+          description: The public configuration.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Config'
+        default:
+          $ref: '#/components/responses/Problem'
   /api/v1/stream:
     get:
       operationId: streamEvents
@@ -59,6 +78,19 @@ components:
           schema:
             $ref: '#/components/schemas/Problem'
   schemas:
+    Config:
+      type: object
+      description: Public, unauthenticated configuration. Never put a secret here.
+      required: [name, version]
+      properties:
+        name:
+          type: string
+          description: The daemon's display name.
+          examples: [skeleton]
+        version:
+          type: string
+          description: The build's version.
+          examples: ['0.1.0']
     Health:
       type: object
       required: [status, version, at]

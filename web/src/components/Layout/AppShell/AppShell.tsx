@@ -12,13 +12,13 @@ const connections: Record<StreamConnection, { label: string; tone: StatusTone }>
 };
 
 /** Page frame: top bar with the product name, navigation and stream state, then the page. */
-export function AppShell({ connection, children }: AppShellProps): JSX.Element {
+export function AppShell({ name, connection, children }: AppShellProps): JSX.Element {
   const { label, tone } = connections[connection];
 
   return (
     <div className="flex min-h-full flex-col">
       <header className="flex items-center gap-6 border-b border-border bg-surface px-6 py-3">
-        <span className="font-mono text-sm font-semibold tracking-wide text-accent">skeleton</span>
+        <span className="font-mono text-sm font-semibold tracking-wide text-accent">{name ?? '\u00a0'}</span>
         <nav className="flex flex-1 gap-4 text-sm">
           <Link to="/" className="text-muted hover:text-foreground" activeProps={{ className: 'text-foreground' }}>
             Home

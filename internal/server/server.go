@@ -24,7 +24,9 @@ const shutdownTimeout = 5 * time.Second
 type Config struct {
 	// Listen is the TCP address to serve on, e.g. 127.0.0.1:8080.
 	Listen string
-	// Version is reported by the health endpoint.
+	// Name is the daemon's display name, reported by getConfig.
+	Name string
+	// Version is reported by the health and config endpoints.
 	Version string
 	// StreamInterval is how often the event stream repeats its health event.
 	// Zero takes the default of 5 s.
@@ -34,6 +36,10 @@ type Config struct {
 }
 
 func (c Config) withDefaults() Config {
+	if c.Name == "" {
+		c.Name = "skeleton"
+	}
+
 	if c.StreamInterval <= 0 {
 		c.StreamInterval = 5 * time.Second
 	}
@@ -62,7 +68,7 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	// Every line the server logs inside a request carries that request's ID.
 	log = slog.New(requestIDHandler{log.Handler()})
 	s := &Server{log: log, cfg: cfg, shutdown: make(chan struct{})}
-	s.ops = &operations{log: log, version: cfg.Version, now: cfg.Now}
+	s.ops = &operations{log: log, name: cfg.Name, version: cfg.Version, now: cfg.Now}
 
 	generated, err := rest.NewServer(
 		s.ops,
@@ -79,7 +85,9 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 		return nil, fmt.Errorf("api: %w", err)
 	}
 
-	app, err := ui.Handler(assets)
+	// The page carries the configuration the API also serves, so the UI's
+	// first render does not wait for a request.
+	app, err := ui.Handler(log, assets, func() ([]byte, error) { return s.ops.config().MarshalJSON() })
 	if err != nil {
 		return nil, fmt.Errorf("ui: %w", err)
 	}

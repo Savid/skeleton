@@ -12,7 +12,7 @@ import (
 	"github.com/savid/skeleton/api/rest"
 )
 
-var testAssets = fstest.MapFS{"index.html": {Data: []byte("<!doctype html><title>app</title>")}}
+var testAssets = fstest.MapFS{"index.html": {Data: []byte("<!doctype html><html><head><title>app</title><!--config--></head></html>")}}
 
 // testNow is in a local zone on purpose: the API must answer in UTC.
 var testNow = time.Date(2026, 9, 26, 22, 0, 0, 0, time.FixedZone("AEST", 10*3600))
@@ -20,7 +20,10 @@ var testNow = time.Date(2026, 9, 26, 22, 0, 0, 0, time.FixedZone("AEST", 10*3600
 func newTestServer(t *testing.T) *Server {
 	t.Helper()
 
-	cfg := Config{Listen: "127.0.0.1:0", Version: "test", StreamInterval: 10 * time.Millisecond, Now: func() time.Time { return testNow }}
+	cfg := Config{
+		Listen: "127.0.0.1:0", Name: "app", Version: "test", StreamInterval: 10 * time.Millisecond,
+		Now: func() time.Time { return testNow },
+	}
 
 	s, err := New(slog.New(slog.DiscardHandler), cfg, testAssets)
 	if err != nil {
@@ -79,6 +82,30 @@ func TestRoutes(t *testing.T) {
 			t.Errorf("%s %s = %d %q, want %d %q", tc.method, tc.path,
 				rec.Code, rec.Header().Get("Content-Type"), tc.status, tc.contentType)
 		}
+	}
+}
+
+// The configuration is served by the API and injected into the page, byte
+// for byte the same.
+func TestConfigServedAndInjected(t *testing.T) {
+	t.Parallel()
+
+	h := newTestServer(t).Handler()
+
+	rec := get(t, h, http.MethodGet, "/api/v1/config")
+
+	var cfg rest.Config
+	if err := cfg.UnmarshalJSON(rec.Body.Bytes()); err != nil {
+		t.Fatal(err)
+	}
+
+	if rec.Code != http.StatusOK || cfg.Name != "app" || cfg.Version != "test" {
+		t.Fatalf("GET /api/v1/config = %d %+v", rec.Code, cfg)
+	}
+
+	page := get(t, h, http.MethodGet, "/some/client/route").Body.String()
+	if want := "<script>window.__CONFIG__=" + rec.Body.String() + ";</script>"; !strings.Contains(page, want) {
+		t.Fatalf("page %q lacks %q", page, want)
 	}
 }
 

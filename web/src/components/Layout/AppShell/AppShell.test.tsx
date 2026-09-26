@@ -7,7 +7,7 @@ describe('AppShell', () => {
   it('frames the page with the product name, navigation and stream state', async () => {
     const root = createRootRoute({
       component: () => (
-        <AppShell connection="reconnecting">
+        <AppShell name="skeleton" connection="reconnecting">
           <p>page body</p>
         </AppShell>
       ),

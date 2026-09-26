@@ -14,6 +14,35 @@ func (s *ProblemStatusCode) Error() string {
 	return fmt.Sprintf("code %d: %+v", s.StatusCode, s.Response)
 }
 
+// Public, unauthenticated configuration. Never put a secret here.
+// Ref: #/components/schemas/Config
+type Config struct {
+	// The daemon's display name.
+	Name string `json:"name"`
+	// The build's version.
+	Version string `json:"version"`
+}
+
+// GetName returns the value of Name.
+func (s *Config) GetName() string {
+	return s.Name
+}
+
+// GetVersion returns the value of Version.
+func (s *Config) GetVersion() string {
+	return s.Version
+}
+
+// SetName sets the value of Name.
+func (s *Config) SetName(val string) {
+	s.Name = val
+}
+
+// SetVersion sets the value of Version.
+func (s *Config) SetVersion(val string) {
+	s.Version = val
+}
+
 // Ref: #/components/schemas/Health
 type Health struct {
 	Status HealthStatus `json:"status"`

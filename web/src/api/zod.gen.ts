@@ -2,6 +2,14 @@
 
 import * as z from 'zod/mini';
 
+/**
+ * Public, unauthenticated configuration. Never put a secret here.
+ */
+export const zConfig = z.object({
+  name: z.string(),
+  version: z.string(),
+});
+
 export const zHealth = z.object({
   status: z.enum(['ok']),
   version: z.string(),
@@ -23,6 +31,11 @@ export const zProblem = z.object({
  * The daemon is serving.
  */
 export const zGetHealthResponse = zHealth;
+
+/**
+ * The public configuration.
+ */
+export const zGetConfigResponse = zConfig;
 
 /**
  * Server-sent `health` events.

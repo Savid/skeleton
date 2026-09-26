@@ -7,6 +7,7 @@ const meta = {
   component: AppShell,
   parameters: { layout: 'fullscreen' },
   args: {
+    name: 'skeleton',
     connection: 'live',
     children: <p className="text-sm text-muted">Page content</p>,
   },

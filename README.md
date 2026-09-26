@@ -12,6 +12,11 @@ What is in the box:
   TanStack Query options) are generated from it with `make generate`, and CI
   fails when the committed output is stale. Errors are RFC 9457 problems. The
   daemon serves the spec at `/openapi.yaml`.
+- **Configuration in the page.** `getConfig` returns the public configuration
+  (name, version); the same JSON is injected into `index.html` as
+  `window.__CONFIG__`, validated against the generated schema and seeded into
+  the query cache before the first render, so the shell never waits for it.
+  The Vite dev server serves the page unmodified and the UI fetches instead.
 - **Requests.** Every request gets an ID (`X-Request-Id`, the proxy's when it
   sent one) that is echoed in the response and attached to every log line the
   handler writes, plus an access log at debug level, warn on server errors.
@@ -70,11 +75,11 @@ adds a clean UI build and embeds it.
 ## Renaming
 
 The name appears in: `go.mod` (module path, then every import), `cmd/skeletond`
-(directory, `main.go`, `Makefile`, `Dockerfile`, `.github/workflows/ci.yml`),
+(directory, `main.go` including the `name` constant the UI shows, `Makefile`,
+`Dockerfile`, `.github/workflows/ci.yml`),
 `api/openapi.yaml` (title), `package.json` and `web/package.json` (names),
-`web/index.html` (title), `web/src/components/Layout/AppShell/AppShell.tsx` and
-its test (product name), `web/src/routes/index.tsx` (head title), and the
-`.golangci.yml` import prefix. `AGENTS.md`, `web/AGENTS.md`, this README and
+`web/index.html` (title), `web/src/routes/index.tsx` (head title), the
+fixtures and stories that use the name, and the `.golangci.yml` import prefix. `AGENTS.md`, `web/AGENTS.md`, this README and
 `.agents/skills/web-page/SKILL.md` mention it in prose.
 
 ## Layout

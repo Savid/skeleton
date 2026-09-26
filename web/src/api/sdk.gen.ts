@@ -10,6 +10,9 @@ import type {
 } from './client';
 import { client } from './client.gen';
 import type {
+  GetConfigData,
+  GetConfigErrors,
+  GetConfigResponses,
   GetHealthData,
   GetHealthErrors,
   GetHealthResponses,
@@ -18,7 +21,7 @@ import type {
   StreamEventsResponse,
   StreamEventsResponses,
 } from './types.gen';
-import { zGetHealthResponse, zStreamEventsResponse } from './zod.gen';
+import { zGetConfigResponse, zGetHealthResponse, zStreamEventsResponse } from './zod.gen';
 
 export type Options<
   TData extends TDataShape = TDataShape,
@@ -47,6 +50,20 @@ export const getHealth = <ThrowOnError extends boolean = false>(
   (options?.client ?? client).get<GetHealthResponses, GetHealthErrors, ThrowOnError>({
     responseValidator: async data => await zGetHealthResponse.parseAsync(data),
     url: '/api/v1/health',
+    ...options,
+  });
+
+/**
+ * Read the public configuration
+ *
+ * What the UI needs before it can render: the daemon's name and build. The same object is injected into `index.html` as `window.__CONFIG__`, so the first render does not wait for this request; the UI reads it from there and refetches later.
+ */
+export const getConfig = <ThrowOnError extends boolean = false>(
+  options?: Options<GetConfigData, ThrowOnError>
+): RequestResult<GetConfigResponses, GetConfigErrors, ThrowOnError> =>
+  (options?.client ?? client).get<GetConfigResponses, GetConfigErrors, ThrowOnError>({
+    responseValidator: async data => await zGetConfigResponse.parseAsync(data),
+    url: '/api/v1/config',
     ...options,
   });
 

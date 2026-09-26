@@ -14,6 +14,7 @@ import (
 // method is added here.
 type operations struct {
 	log     *slog.Logger
+	name    string
 	version string
 	now     func() time.Time
 }
@@ -29,6 +30,16 @@ func (a *operations) health() *rest.Health {
 
 func (a *operations) GetHealth(context.Context) (*rest.Health, error) {
 	return a.health(), nil
+}
+
+// config is the public configuration: served by GetConfig and injected into
+// index.html. Nothing here may be a secret.
+func (a *operations) config() *rest.Config {
+	return &rest.Config{Name: a.name, Version: a.version}
+}
+
+func (a *operations) GetConfig(context.Context) (*rest.Config, error) {
+	return a.config(), nil
 }
 
 // NewError turns an unexpected handler error into a 500 problem.

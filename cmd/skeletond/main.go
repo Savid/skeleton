@@ -19,6 +19,9 @@ import (
 	"github.com/savid/skeleton/web"
 )
 
+// name is the daemon's display name, shown by the UI.
+const name = "skeleton"
+
 // version is set at build time: -ldflags "-X main.version=...".
 var version = "dev"
 
@@ -90,7 +93,7 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 	log := newLogger(stderr, o).With("version", version)
 
-	srv, err := server.New(log, server.Config{Listen: o.listen, Version: version}, assets)
+	srv, err := server.New(log, server.Config{Listen: o.listen, Name: name, Version: version}, assets)
 	if err != nil {
 		return err
 	}

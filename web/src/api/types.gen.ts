@@ -4,6 +4,20 @@ export type ClientOptions = {
   baseUrl: `${string}://${string}` | (string & {});
 };
 
+/**
+ * Public, unauthenticated configuration. Never put a secret here.
+ */
+export type Config = {
+  /**
+   * The daemon's display name.
+   */
+  name: string;
+  /**
+   * The build's version.
+   */
+  version: string;
+};
+
 export type Health = {
   status: 'ok';
   /**
@@ -51,6 +65,31 @@ export type GetHealthResponses = {
 };
 
 export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
+export type GetConfigData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: '/api/v1/config';
+};
+
+export type GetConfigErrors = {
+  /**
+   * An error, as an RFC 9457 problem.
+   */
+  default: Problem;
+};
+
+export type GetConfigError = GetConfigErrors[keyof GetConfigErrors];
+
+export type GetConfigResponses = {
+  /**
+   * The public configuration.
+   */
+  200: Config;
+};
+
+export type GetConfigResponse = GetConfigResponses[keyof GetConfigResponses];
 
 export type StreamEventsData = {
   body?: never;

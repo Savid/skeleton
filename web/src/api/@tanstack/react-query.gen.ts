@@ -3,8 +3,15 @@
 import { queryOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { getHealth, type Options } from '../sdk.gen';
-import type { GetHealthData, GetHealthError, GetHealthResponse } from '../types.gen';
+import { getConfig, getHealth, type Options } from '../sdk.gen';
+import type {
+  GetConfigData,
+  GetConfigError,
+  GetConfigResponse,
+  GetHealthData,
+  GetHealthError,
+  GetHealthResponse,
+} from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
   Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -62,4 +69,25 @@ export const getHealthOptions = (options?: Options<GetHealthData>) =>
       return data;
     },
     queryKey: getHealthQueryKey(options),
+  });
+
+export const getConfigQueryKey = (options?: Options<GetConfigData>) => createQueryKey('getConfig', options);
+
+/**
+ * Read the public configuration
+ *
+ * What the UI needs before it can render: the daemon's name and build. The same object is injected into `index.html` as `window.__CONFIG__`, so the first render does not wait for this request; the UI reads it from there and refetches later.
+ */
+export const getConfigOptions = (options?: Options<GetConfigData>) =>
+  queryOptions<GetConfigResponse, GetConfigError, GetConfigResponse, ReturnType<typeof getConfigQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getConfig({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getConfigQueryKey(options),
   });

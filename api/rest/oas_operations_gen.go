@@ -6,5 +6,6 @@ package rest
 type OperationName = string
 
 const (
+	GetConfigOperation OperationName = "GetConfig"
 	GetHealthOperation OperationName = "GetHealth"
 )

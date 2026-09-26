@@ -8,6 +8,14 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
+	// GetConfig implements getConfig operation.
+	//
+	// What the UI needs before it can render: the daemon's name and build. The same object is injected
+	// into `index.html` as `window.__CONFIG__`, so the first render does not wait for this request; the UI
+	// reads it from there and refetches later.
+	//
+	// GET /api/v1/config
+	GetConfig(ctx context.Context) (*Config, error)
 	// GetHealth implements getHealth operation.
 	//
 	// Report daemon health.
