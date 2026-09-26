@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"testing/fstest"
 	"time"
@@ -13,7 +14,8 @@ import (
 
 var testAssets = fstest.MapFS{"index.html": {Data: []byte("<!doctype html><title>app</title>")}}
 
-var testNow = time.Date(2026, 9, 26, 12, 0, 0, 0, time.UTC)
+// testNow is in a local zone on purpose: the API must answer in UTC.
+var testNow = time.Date(2026, 9, 26, 22, 0, 0, 0, time.FixedZone("AEST", 10*3600))
 
 func newTestServer(t *testing.T) *Server {
 	t.Helper()
@@ -49,6 +51,11 @@ func TestHealth(t *testing.T) {
 
 	if rec.Code != http.StatusOK || body.Status != rest.HealthStatusOk || body.Version != "test" || !body.At.Equal(testNow) {
 		t.Fatalf("GET /api/v1/health = %d %+v", rec.Code, body)
+	}
+
+	// The generated web client accepts only UTC date-times.
+	if !strings.Contains(rec.Body.String(), `"at":"2026-09-26T12:00:00Z"`) {
+		t.Errorf("health is not in UTC: %s", rec.Body.String())
 	}
 }
 

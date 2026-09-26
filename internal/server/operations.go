@@ -20,8 +20,11 @@ type operations struct {
 
 var _ rest.Handler = (*operations)(nil)
 
+// health is the current health. Times in the API are always UTC: the
+// generated client validates date-time fields with Zod, which accepts only
+// the Z suffix, not a local offset.
 func (a *operations) health() *rest.Health {
-	return &rest.Health{Status: rest.HealthStatusOk, Version: a.version, At: a.now()}
+	return &rest.Health{Status: rest.HealthStatusOk, Version: a.version, At: a.now().UTC()}
 }
 
 func (a *operations) GetHealth(context.Context) (*rest.Health, error) {
