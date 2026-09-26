@@ -14,8 +14,13 @@ paths:
 - Titles: reusable components `Components/<Category>/<Name>`; page-only parts
   `Pages/<Section>/Components/<Name>`; full pages `Pages/<Section>/<Name>Page`;
   docs pages `Design/<Name>`.
-- A `Default` story comes first. Its args drive the controls, so controls must
-  change what renders.
+- Export order is meaning; autodocs renders in it. `Default` first, then
+  variants, then states (`Loading`, `Empty`, `Error`, `Disabled` as they
+  apply), then edge cases (overflow, long identifiers, zero and huge counts),
+  then `…Interaction` play stories last. `Default`'s args drive the controls,
+  so controls must change what renders.
+- Fixtures and stories share one frozen clock: `NOW_MS` and `at()` from
+  `@/test-utils/time`. Never `Date.now()` or a literal date in a fixture.
 - Full-page stories use `tags: ['!autodocs']` and `layout: 'fullscreen'`.
 - Mock the API per story with `parameters.msw.handlers`, reusing the handlers in
   `src/test-utils/handlers.ts` and, for event streams,

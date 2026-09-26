@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { render, screen, server } from '@/test-utils';
 import { healthHandlers } from '@/test-utils/handlers';
+import { NOW_MS } from '@/test-utils/time';
 import { HealthCard } from './HealthCard';
 
-const now = Date.parse('2026-09-26T12:00:12.000Z');
+const now = NOW_MS;
 
 describe('HealthCard', () => {
   it('shows the version and the age of the last answer', async () => {

@@ -12,19 +12,25 @@ This repo contains:
 - `internal/server`: the ogen operations, hand-routed event streams, problems,
   the UI mount
 - `internal/ui`: serves the embedded single-page app
+- `internal/testutil/importguard`: lists packages and imports for boundary
+  tests; `boundary_test.go` there is the repository's dependency rules
 - `web/`: the UI (Vite, React, TanStack). Read [web/AGENTS.md](web/AGENTS.md)
   before frontend work.
 
 Add a package under `internal/` per concern as the domain grows. Each
 package owns its goroutines, takes an injected `*slog.Logger`, and exposes a
-small interface that its consumers define on their side.
+small interface that its consumers define on their side. A decision that
+should be a pure function of its inputs (a policy, a planner, a reducer) goes
+under `pkg/`: lint and the boundary test keep `pkg/` free of the application,
+transport, storage, the process clock and randomness, so it replays exactly.
 
 ## Commands
 
 Run `pnpm install` once at the repo root before any frontend command.
 
 ```bash
-make check            # everything CI runs: lint, generate-check, Go, web and story tests
+make check            # everything CI runs: lint, generate-check, tests, govulncheck, tidy-check
+make audit            # check, then rebuild the UI and the binary with it embedded
 make generate         # regenerate api/rest and web/src/api after editing api/openapi.yaml
 make test-go          # go test -race ./...
 make lint-go          # golangci-lint
@@ -55,7 +61,12 @@ make storybook        # component explorer on :6006
 - Loggers are injected `*slog.Logger`s, never the global one; use the
   `…Context` methods when a context is in scope (`sloglint` enforces both).
 - Time is injected where a test needs to control it (`Config.Now`), never
-  read from `time.Now` inside a handler.
+  read from `time.Now` inside a handler. Times in the API are UTC: the
+  generated client's Zod schemas accept only the `Z` suffix.
+- Dependency boundaries are tests, not review notes. When a package must not
+  be imported outside a few places, add a line to `boundaries` in
+  `internal/testutil/importguard/boundary_test.go`; mirror it in
+  `.golangci.yml`'s `depguard` when lint-time feedback helps.
 - Fix lint findings rather than suppressing them. A `//nolint` names the linter
   and says why.
 - Skills for repeated tasks live in `.agents/skills/` (also visible to Claude

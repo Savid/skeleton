@@ -30,8 +30,9 @@ rules; this skill is the order of work.
    `@/test-utils` with MSW handlers added by `server.use(...)`, and
    `FakeEventSource` for streams. Cover loading, error and settled states.
 7. **Stories.** `<Name>Page.stories.tsx` titled `Pages/<Section>/<Name>Page`,
-   plus stories for each new component. Add MSW handlers for the new endpoint to
-   `web/src/test-utils/handlers.ts` (one per state) and follow
-   `web/.claude/rules/storybook.md`.
+   plus stories for each new component. Add MSW handlers and fixtures for the
+   new endpoint in `web/src/test-utils/handlers/<domain>.ts` (one handler per
+   state, times from `@/test-utils/time`), export them from `handlers/index.ts`,
+   and follow `web/.claude/rules/storybook.md`.
 8. **Check.** From the repo root: `make lint-web test-web`, plus
    `make lint-api test-go` if you touched the spec or the server.

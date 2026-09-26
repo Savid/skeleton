@@ -20,8 +20,11 @@ What is in the box:
 - **UI.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router and Query.
   Every component has a props type, a test and stories; every story runs as a
   browser test with accessibility checks; unmocked API calls fail tests.
-- **Tooling.** golangci-lint (strict), eslint with the React Compiler rules,
-  prettier, knip, Redocly; `make check` runs what CI runs.
+- **Tooling.** golangci-lint (strict, with `depguard` and `forbidigo`
+  guarding `pkg/`), eslint with the React Compiler rules, prettier, knip,
+  Redocly, govulncheck and a tidy check; `make check` runs what CI runs.
+  Dependency boundaries are a Go test (`internal/testutil/importguard`), and a
+  contract test keeps the generated server server-only.
 - **Image.** A static binary on distroless, running as nonroot.
 - **Agent guidance.** `AGENTS.md` and `web/AGENTS.md` describe the layout and
   rules; `.agents/skills/` holds task skills (also visible to Claude Code
@@ -29,7 +32,7 @@ What is in the box:
 
 ## Quick start
 
-Needs Go 1.26 and golangci-lint 2.12 (`.tool-versions`), and node 24 with
+Needs Go 1.27 and golangci-lint 2.14 (`.tool-versions`), and node 24 with
 pnpm 11 (pinned through volta in `package.json`).
 
 ```bash
@@ -48,7 +51,8 @@ and pages also render in Storybook with mocked API responses: `make storybook`,
 then http://localhost:6006. Story tests need Playwright's Chromium
 (`pnpm --dir web exec playwright install chromium`).
 
-`make help` lists every target. `make check` runs what CI runs.
+`make help` lists every target. `make check` runs what CI runs; `make audit`
+adds a clean UI build and embeds it.
 
 ## Renaming
 
@@ -67,6 +71,8 @@ api/                    openapi.yaml, ogen config; rest/ is generated
 cmd/skeletond/          entry point: flags, wiring, shutdown
 internal/server/        ogen operations, SSE stream, problems, then the UI
 internal/ui/            serves the embedded single-page app
+internal/testutil/      importguard: package boundaries as a test
+pkg/                    (none yet) pure decision packages, guarded by lint and test
 web/                    Vite + React UI; src/api is generated; embed.go embeds web/dist
 Dockerfile              the image: UI, then a static binary on distroless
 .agents/skills/         task skills for coding agents
@@ -83,4 +89,6 @@ Dockerfile              the image: UI, then a static binary on distroless
 - **A page:** follow `.agents/skills/web-page/SKILL.md`.
 - **A Go package:** one concern per `internal/<name>`, an injected
   `*slog.Logger`, its goroutines owned by a `Run(ctx)`, and consumers defining
-  the interface they need on their side.
+  the interface they need on their side. A pure decision goes in `pkg/<name>`
+  and takes time and randomness as inputs.
+- **A boundary:** a line in `internal/testutil/importguard/boundary_test.go`.

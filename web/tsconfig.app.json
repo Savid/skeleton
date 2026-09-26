@@ -28,5 +28,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src", ".storybook/preview.tsx", ".storybook/vitest-setup.ts"]
+  "include": ["src"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.stories.tsx", "src/test-utils"]
 }

@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # Web UI: built first so the Go binary can embed it.
-FROM node:24.19.0-bookworm-slim AS web
+FROM node:24.21.0-bookworm-slim AS web
 ENV COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 RUN corepack enable
 WORKDIR /src
@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile
 COPY web/ web/
 RUN pnpm --dir web build
 
-FROM golang:1.26.6 AS go
+FROM golang:1.27.1 AS go
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN GOWORK=off go mod download

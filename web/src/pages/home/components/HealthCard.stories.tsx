@@ -1,13 +1,14 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect } from 'storybook/test';
 import { healthHandlers } from '@/test-utils/handlers';
+import { NOW_MS } from '@/test-utils/time';
 import { HealthCard } from './HealthCard';
 
 const meta = {
   title: 'Pages/Home/Components/HealthCard',
   component: HealthCard,
   parameters: { layout: 'padded', msw: { handlers: [healthHandlers.ok] } },
-  args: { now: Date.parse('2026-09-26T12:00:12.000Z') },
+  args: { now: NOW_MS },
 } satisfies Meta<typeof HealthCard>;
 
 export default meta;

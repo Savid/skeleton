@@ -52,9 +52,15 @@ Versions are pinned in `package.json` and the lockfile.
   `invalidateQueries` when it only says something changed. Components keep
   reading through `useQuery`. Add new events there, not in a second hook.
 - Import through `@/`, never `../`. Tests import helpers from `@/test-utils`.
+- Three TypeScript projects: `tsconfig.app.json` is the shipped app and
+  excludes tests, stories and test utilities; `tsconfig.test.json` adds the
+  test globals for those; `tsconfig.node.json` covers the config files. Test
+  types never leak into the app.
 - MSW handlers and fixtures, typed with the generated types, live in
-  `src/test-utils/handlers.ts`; split it by domain when it grows. Unit tests
-  add handlers with `server.use(...)` and drive streams with `FakeEventSource`.
+  `src/test-utils/handlers/`, one file per API domain, re-exported from its
+  `index.ts`. Fixtures take their times from `@/test-utils/time` (`NOW_MS`,
+  `at()`), never `Date.now()`. Unit tests add handlers with `server.use(...)`
+  and drive streams with `FakeEventSource`.
   A story that opens a stream needs an `sse()` handler from MSW (jsdom has no
   `EventSource`, so those are for stories only).
 - Design reference pages (MDX) live in `src/design-docs/`.

@@ -1,10 +1,11 @@
 import { delay, http, HttpResponse } from 'msw';
 import type { Health } from '@/api';
+import { at } from '@/test-utils/time';
 
 // Fixtures are typed with the generated types, so a spec change that breaks
-// them fails typecheck. Split this file by domain as it grows.
+// them fails typecheck. One file per API domain.
 
-export const healthFixture: Health = { status: 'ok', version: '0.1.0', at: '2026-09-26T12:00:00.000Z' };
+export const healthFixture: Health = { status: 'ok', version: '0.1.0', at: at(-12_000) };
 
 /** MSW handlers for GET /api/v1/health, one per state a story needs. */
 export const healthHandlers = {

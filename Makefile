@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help build image run check lint lint-go lint-web lint-api generate generate-check fmt test test-go test-web storybook install-frontend build-web web-assets web-placeholder clean
+.PHONY: help build image run check audit lint lint-go lint-web lint-api generate generate-check vuln tidy-check fmt test test-go test-web storybook install-frontend build-web web-assets web-placeholder clean
 
 BIN_DIR ?= build/bin
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -29,7 +29,11 @@ run: build
 	$(BIN_DIR)/skeletond -listen $(LISTEN)
 
 ## check: everything CI runs
-check: lint generate-check test
+check: lint generate-check test vuln tidy-check
+
+## audit: check, plus a clean rebuild of the UI to prove it embeds
+audit: check build-web
+	$(GO_BUILD) -o $(BIN_DIR)/skeletond ./cmd/skeletond
 
 ## lint: golangci-lint; eslint, tsc, prettier and knip; Redocly on the spec
 lint: lint-go lint-web lint-api
@@ -55,6 +59,15 @@ generate: install-frontend
 generate-check: generate
 	@test -z "$$(git status --porcelain -- api/rest web/src/api)" || \
 		{ git status --short -- api/rest web/src/api; echo "generated code is stale: run make generate and commit it"; exit 1; }
+
+## vuln: report known vulnerabilities in the Go dependency graph
+vuln:
+	$(GO) tool govulncheck ./...
+
+## tidy-check: fail if go.mod or go.sum would change under go mod tidy
+tidy-check:
+	$(GO) mod tidy -diff
+	$(GO) mod verify
 
 ## fmt: format Go and web sources
 fmt:
