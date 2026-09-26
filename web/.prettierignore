@@ -4,3 +4,4 @@ storybook-static
 src/routeTree.gen.ts
 .storybook/public
 embed.go
+coverage

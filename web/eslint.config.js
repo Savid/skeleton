@@ -12,7 +12,15 @@ import storybook from 'eslint-plugin-storybook';
 export default defineConfig(
   {
     // src/api is generated from ../api/openapi.yaml (pnpm generate:api).
-    ignores: ['dist', 'node_modules', 'storybook-static', '.storybook/public', 'src/routeTree.gen.ts', 'src/api'],
+    ignores: [
+      'dist',
+      'node_modules',
+      'coverage',
+      'storybook-static',
+      '.storybook/public',
+      'src/routeTree.gen.ts',
+      'src/api',
+    ],
   },
   {
     // A suppression only stays honest if a dead one fails the build.

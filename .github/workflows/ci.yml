@@ -72,7 +72,29 @@ jobs:
       - run: pnpm --dir web typecheck
       - run: pnpm --dir web format:check
       - run: pnpm knip
-      - run: pnpm --dir web exec playwright install --with-deps chromium
+      # Story tests run in Chromium. The browser download is keyed on the
+      # Playwright version, so it is fetched once per bump, not per run.
+      - id: playwright
+        run: echo "version=$(jq -r .devDependencies.playwright web/package.json)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: browsers
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+      - if: steps.browsers.outputs.cache-hit != 'true'
+        run: pnpm --dir web exec playwright install --with-deps chromium
+      - if: steps.browsers.outputs.cache-hit == 'true'
+        run: pnpm --dir web exec playwright install-deps chromium
       - run: pnpm --dir web test
       - run: pnpm --dir web build
       - run: pnpm --dir web build-storybook
+
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Proves the Dockerfile builds; nothing is pushed.
+      - run: docker build --build-arg VERSION=ci .

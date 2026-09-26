@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "eslint . --cache --cache-location node_modules/.cache/eslint",
+    "lint": "eslint . --max-warnings 0 --cache --cache-location node_modules/.cache/eslint",
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:unit": "vitest run --project unit",
@@ -17,7 +17,8 @@
     "build-storybook": "storybook build",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "generate:api": "openapi-ts"
+    "generate:api": "openapi-ts",
+    "test:coverage": "vitest run --project unit --coverage"
   },
   "dependencies": {
     "@tanstack/react-query": "5.103.2",
@@ -46,6 +47,7 @@
     "@vitejs/plugin-react": "6.1.1",
     "@vitest/browser": "4.1.11",
     "@vitest/browser-playwright": "4.1.11",
+    "@vitest/coverage-v8": "4.1.11",
     "@vitest/eslint-plugin": "1.6.27",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",

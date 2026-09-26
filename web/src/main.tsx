@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from '@/routeTree.gen';
+import { ErrorPage } from '@/pages/error/ErrorPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import './index.css';
 
@@ -12,6 +13,7 @@ const router = createRouter({
   routeTree,
   defaultPreload: 'intent',
   defaultNotFoundComponent: () => <NotFoundPage />,
+  defaultErrorComponent: ({ error, reset }) => <ErrorPage error={error} reset={reset} />,
 });
 
 declare module '@tanstack/react-router' {

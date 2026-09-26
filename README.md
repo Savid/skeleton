@@ -17,15 +17,18 @@ What is in the box:
   in the spec is served with the content type it declares. The UI opens the
   stream once, validates each event against the generated schema and writes it
   into the query cache.
-- **UI.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router and Query.
-  Every component has a props type, a test and stories; every story runs as a
-  browser test with accessibility checks; unmocked API calls fail tests.
+- **UI.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router and Query,
+  with not-found and error pages wired into the router. Every component has a
+  props type, a test and stories; every story runs as a browser test with
+  accessibility checks; unmocked API calls fail tests; eslint warnings fail
+  lint.
 - **Tooling.** golangci-lint (strict, with `depguard` and `forbidigo`
   guarding `pkg/`), eslint with the React Compiler rules, prettier, knip,
   Redocly, govulncheck and a tidy check; `make check` runs what CI runs.
   Dependency boundaries are a Go test (`internal/testutil/importguard`), and a
   contract test keeps the generated server server-only.
-- **Image.** A static binary on distroless, running as nonroot.
+- **Image.** A static binary on distroless, running as nonroot; CI builds it
+  on every push.
 - **Agent guidance.** `AGENTS.md` and `web/AGENTS.md` describe the layout and
   rules; `.agents/skills/` holds task skills (also visible to Claude Code
   through `.claude/skills`).
@@ -48,6 +51,9 @@ build/bin/skeletond               # http://127.0.0.1:8080
 | Flag | Default | |
 | --- | --- | --- |
 | `-listen` | `127.0.0.1:8080` | HTTP address: API and UI |
+| `-log-format` | `text` | `text` for a terminal, `json` for a log collector |
+| `-log-level` | `INFO` | `DEBUG` also logs one line per request |
+| `-version` | | print the build's version and exit |
 
 For UI work, run `make run` in one terminal and `pnpm --dir web dev` in another,
 then open http://localhost:5173. Vite proxies `/api/` to the daemon. Components

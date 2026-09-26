@@ -16,6 +16,17 @@ export default defineConfig({
   test: {
     restoreMocks: true,
     unstubGlobals: true,
+    coverage: {
+      provider: 'v8',
+      include: ['src/**/*.{ts,tsx}'],
+      exclude: [
+        'src/api/**',
+        'src/routeTree.gen.ts',
+        'src/test-utils/**',
+        'src/**/*.{test,stories}.{ts,tsx}',
+        'src/**/*.d.ts',
+      ],
+    },
     projects: [
       {
         // Component and page tests in jsdom.

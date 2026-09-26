@@ -92,7 +92,7 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	mux.Handle("/", app)
 
 	s.http = &http.Server{
-		Handler:           mux,
+		Handler:           accessLog(log, mux),
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       2 * time.Minute,
 		// No WriteTimeout: event streams are long-lived and bound each write
@@ -104,7 +104,8 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	return s, nil
 }
 
-// Handler returns the route table, for tests.
+// Handler returns the served handler (the route table behind the access
+// log), for tests.
 func (s *Server) Handler() http.Handler {
 	return s.http.Handler
 }
