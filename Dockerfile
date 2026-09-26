@@ -11,7 +11,7 @@ RUN pnpm install --frozen-lockfile
 COPY web/ web/
 RUN pnpm --dir web build
 
-FROM golang:1.26.6 AS go
+FROM golang:1.27.1 AS go
 WORKDIR /src
 COPY go.mod go.sum ./
 RUN GOWORK=off go mod download
