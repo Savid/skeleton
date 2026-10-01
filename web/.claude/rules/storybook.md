@@ -8,12 +8,17 @@ paths:
 
 # Storybook
 
-- Every story is a test (`pnpm test:storybook`): it must render in Chromium,
-  pass its `play` function, log no console errors and have no accessibility
-  violations. Fix a failing story; never exclude it.
+- Every story is a test (`pnpm test:storybook`), run under each colour scheme
+  (the `storybook:dark` and `storybook:light` instances): it must render in
+  Chromium, pass its `play` function, log no console errors and have no
+  accessibility violations in either theme. Fix a failing story; never exclude
+  it.
 - Titles: reusable components `Components/<Category>/<Name>`; page-only parts
   `Pages/<Section>/Components/<Name>`; full pages `Pages/<Section>/<Name>Page`;
-  docs pages `Design/<Name>`.
+  design-system pages `Foundations/<Name>` (listed in `storySort` in
+  `.storybook/preview.tsx`). A Foundations page is `<Name>.mdx`, prose with
+  `<Story of={Stories.X} />` for every example, plus `<Name>.stories.tsx`,
+  whose stories hold the examples and are tagged `!dev`.
 - Export order is meaning; autodocs renders in it. `Default` first, then
   variants, then states (`Loading`, `Empty`, `Error`, `Disabled` as they
   apply), then edge cases (overflow, long identifiers, zero and huge counts),

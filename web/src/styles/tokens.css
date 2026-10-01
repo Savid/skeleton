@@ -1,0 +1,64 @@
+/* The design tokens, and the only stylesheet with colour literals. The rules,
+ * and how to add a token: .claude/rules/styling.md. */
+
+/* No sources here: each entry stylesheet says what Tailwind scans. */
+@import 'tailwindcss' source(none);
+
+:root {
+  color-scheme: light dark;
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@theme {
+  /* Tailwind's defaults removed, so only these tokens compile. */
+  --*: initial;
+
+  /* The 4px step every spacing and sizing class multiplies. */
+  --spacing: 0.25rem;
+
+  /* Colours: each a light-dark(light, dark) pair, resolved by the colour scheme above. */
+  --color-background: light-dark(#f6f7f9, #0b0d12);
+  --color-surface: light-dark(#ffffff, #13161e);
+  /* border separates; border-strong outlines a control. */
+  --color-border: light-dark(#dcdfe6, #262b36);
+  --color-border-strong: light-dark(#7b8394, #6e768a);
+  --color-foreground: light-dark(#161a22, #e6e8ee);
+  --color-muted: light-dark(#576072, #8b93a7);
+  /* The brand colour: links, the product name, selection, the focus ring. */
+  --color-accent: light-dark(#9a5800, #f5b83d);
+  /* Text on an accent fill. */
+  --color-accent-foreground: light-dark(#ffffff, #0b0d12);
+  --color-focus: var(--color-accent);
+  --color-ok: light-dark(#15783a, #4ade80);
+  --color-warn: light-dark(#b54708, #fb923c);
+  --color-danger: light-dark(#be2a2a, #f87171);
+
+  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Liberation Mono', monospace;
+
+  /* Type sizes in rem, so browser zoom and font settings apply; each carries its line height. */
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.25rem;
+  --text-title: 1rem;
+  --text-title--line-height: 1.5rem;
+  --text-heading: 1.5rem;
+  --text-heading--line-height: 2rem;
+
+  --font-weight-semibold: 600;
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+
+  /* Content widths: max-w-narrow, max-w-page. */
+  --container-narrow: 48rem;
+  --container-page: 56rem;
+}

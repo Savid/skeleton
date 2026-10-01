@@ -1,0 +1,21 @@
+/* Base styles only; every value comes from tokens.css. */
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-background font-sans text-body text-foreground antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-focus;
+  }
+
+  ::selection {
+    @apply bg-accent text-accent-foreground;
+  }
+}

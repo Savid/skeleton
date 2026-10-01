@@ -18,9 +18,13 @@ export function AppShell({ name, connection, children }: AppShellProps): JSX.Ele
   return (
     <div className="flex min-h-full flex-col">
       <header className="flex items-center gap-6 border-b border-border bg-surface px-6 py-3">
-        <span className="font-mono text-sm font-semibold tracking-wide text-accent">{name ?? '\u00a0'}</span>
-        <nav className="flex flex-1 gap-4 text-sm">
-          <Link to="/" className="text-muted hover:text-foreground" activeProps={{ className: 'text-foreground' }}>
+        <span className="font-mono text-body font-semibold text-accent">{name ?? '\u00a0'}</span>
+        <nav className="flex flex-1 gap-4 text-body">
+          <Link
+            to="/"
+            activeProps={{ className: 'text-foreground underline underline-offset-4' }}
+            inactiveProps={{ className: 'text-muted hover:text-foreground' }}
+          >
             Home
           </Link>
         </nav>

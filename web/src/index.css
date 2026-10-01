@@ -1,30 +1,13 @@
-@import 'tailwindcss';
+/* The app's stylesheet: the tokens, the base styles, and the files Tailwind
+ * scans for classes. Stories, tests, the Foundations pages and the token
+ * tooling (whose token names read as class names) are left out, so none of
+ * their classes ship. Storybook's stylesheet is .storybook/preview.css. */
+@import './styles/tokens.css';
+@import './styles/base.css';
 
-/* Semantic tokens. Components use these names (bg-surface, text-muted, …),
- * never raw palette colours, so the theme can change in one place. */
-@theme {
-  --color-background: #0b0d12;
-  --color-surface: #13161e;
-  --color-border: #262b36;
-  --color-foreground: #e6e8ee;
-  --color-muted: #8b93a7;
-  --color-accent: #f5b83d;
-  --color-ok: #4ade80;
-  --color-warn: #fbbf24;
-  --color-danger: #f87171;
-
-  --font-sans: ui-sans-serif, system-ui, sans-serif;
-  --font-mono: ui-monospace, monospace;
-}
-
-@layer base {
-  html,
-  body,
-  #root {
-    height: 100%;
-  }
-
-  body {
-    @apply bg-background font-sans text-foreground antialiased;
-  }
-}
+@source './';
+@source not './design-docs';
+@source not './styles';
+@source not './test-utils';
+@source not './**/*.stories.tsx';
+@source not './**/*.test.{ts,tsx}';

@@ -1,6 +1,7 @@
 {
-  // Tests, stories, test utilities and the Storybook preview: the app's
-  // settings plus the test globals, so those types never leak into the app.
+  // Tests, stories, test utilities, the token tooling, the Foundations docs and
+  // the Storybook preview: the app's settings plus the test globals, so those
+  // types never leak into the app.
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.test.tsbuildinfo",
@@ -11,6 +12,8 @@
     "src/**/*.test.tsx",
     "src/**/*.stories.tsx",
     "src/test-utils",
+    "src/design-docs",
+    "src/styles/**/*.ts",
     "src/vite-env.d.ts",
     ".storybook/preview.tsx",
     ".storybook/vitest-setup.ts"

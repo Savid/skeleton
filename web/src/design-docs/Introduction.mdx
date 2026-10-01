@@ -1,0 +1,29 @@
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Foundations/Introduction" />
+
+# Foundations
+
+These pages document the design tokens every component is built from. Every colour, type size, radius and width is a
+token in `src/styles/tokens.css`, and the values shown here are read from that file.
+
+## Principles
+
+**Tokens, not values.** A component never names a colour or a size. If no token fits, add one; an arbitrary value is
+a design decision nobody can find again.
+
+**Name the role, not the look.** `danger`, not `red`; `muted`, not `gray`; `page`, not a number. A role survives a
+rebrand, and a reader knows what it is for.
+
+**Both themes, always.** Every colour is a light and dark pair, and both pass the same contrast checks.
+
+**Never colour alone.** A state is a word or a mark as well as a colour: a badge says `reconnecting`, an error says
+what failed, the current page is underlined.
+
+## Themes
+
+There are two themes, light and dark: each colour is a `light-dark(light, dark)` pair. The page follows the system's
+colour scheme, and `data-theme="light"` or `data-theme="dark"` on `<html>` forces one; the toolbar's theme switch does
+that here. Every story is tested in both themes.
+
+To add or change a token, follow `web/.claude/rules/styling.md`.

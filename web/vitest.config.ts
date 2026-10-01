@@ -14,6 +14,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Vitest stubs CSS imports; the token test reads tokens.css as text (`?raw`).
+    css: { include: [/\/src\/styles\/tokens\.css/] },
     restoreMocks: true,
     unstubGlobals: true,
     coverage: {
@@ -23,6 +25,8 @@ export default defineConfig({
         'src/api/**',
         'src/routeTree.gen.ts',
         'src/test-utils/**',
+        'src/design-docs/**',
+        'src/styles/**',
         'src/**/*.{test,stories}.{ts,tsx}',
         'src/**/*.d.ts',
       ],
@@ -41,7 +45,8 @@ export default defineConfig({
       },
       {
         // Every story is a test: it must render, pass its play function and
-        // have no accessibility violations, in headless Chromium.
+        // have no accessibility violations, in headless Chromium, once under
+        // each colour scheme (the stories follow it; see .storybook/preview.tsx).
         extends: true,
         plugins: [
           tailwindcss(),
@@ -54,8 +59,13 @@ export default defineConfig({
           browser: {
             enabled: true,
             headless: true,
-            provider: playwright({ contextOptions: { locale: 'en-US', timezoneId: 'UTC', reducedMotion: 'reduce' } }),
-            instances: [{ browser: 'chromium' }],
+            instances: (['light', 'dark'] as const).map(theme => ({
+              browser: 'chromium' as const,
+              name: `storybook:${theme}`,
+              provider: playwright({
+                contextOptions: { locale: 'en-US', timezoneId: 'UTC', reducedMotion: 'reduce', colorScheme: theme },
+              }),
+            })),
           },
         },
       },

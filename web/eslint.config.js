@@ -8,6 +8,12 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import prettier from 'eslint-plugin-prettier/recommended';
 import vitest from '@vitest/eslint-plugin';
 import storybook from 'eslint-plugin-storybook';
+import betterTailwind from 'eslint-plugin-better-tailwindcss';
+import { getDefaultSelectors } from 'eslint-plugin-better-tailwindcss/defaults';
+
+const noColor = 'Colours come from tokens in src/styles/tokens.css, used as Tailwind classes.';
+// An opacity or line-height modifier (`bg-accent/10`, `text-body/6`); `w-1/2` is a fraction, not one.
+const modifier = '(?:^|:)!?[a-z-]*[a-z]/\\d+!?$';
 
 export default defineConfig(
   {
@@ -82,7 +88,65 @@ export default defineConfig(
           patterns: [{ group: ['../*'], message: 'Import through the @/ alias instead of parent-relative paths.' }],
         },
       ],
+      'no-restricted-syntax': [
+        'error',
+        // Inline styles bypass the tokens; the Foundations blocks are the exception.
+        { selector: "JSXAttribute[name.name='style']", message: noColor },
+        {
+          selector:
+            "JSXAttribute[name.name=/^(?:fill|stroke|color|stopColor|floodColor|lightingColor)$/] > Literal[value!='currentColor'][value!='none']",
+          message: noColor,
+        },
+      ],
     },
+  },
+  {
+    // Class names must be tokens: Tailwind's defaults are reset in tokens.css,
+    // so an unknown class is one no token covers. Besides className, clsx and
+    // the plugin's other defaults, it reads variant maps named `…Classes` or
+    // `…Styles` and the router's activeProps / inactiveProps.
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [betterTailwind.configs['correctness-error']],
+    settings: {
+      'better-tailwindcss': {
+        entryPoint: 'src/styles/tokens.css',
+        selectors: [
+          ...getDefaultSelectors(),
+          { kind: 'variable', name: '[A-Za-z]*(?:Classes|Styles)', match: [{ type: 'objectValues' }] },
+          {
+            kind: 'attribute',
+            name: '^(?:active|inactive)Props$',
+            match: [{ type: 'objectValues', path: '^className$' }],
+          },
+        ],
+      },
+    },
+    rules: {
+      'better-tailwindcss/enforce-canonical-classes': 'error',
+      'better-tailwindcss/no-restricted-classes': [
+        'error',
+        {
+          restrict: [
+            { pattern: '\\[[^\\[\\]]*\\](?!:)', message: 'Arbitrary values bypass the tokens; add a token instead.' },
+            { pattern: '\\(--[^()]*\\)', message: 'Arbitrary variables bypass the tokens; add a token instead.' },
+            {
+              pattern: '(?:^|:)dark:',
+              message: 'Tokens change with the theme; give the colour a light-dark() pair instead of a dark: variant.',
+            },
+            { pattern: '(?:^|:)!?leading-', message: 'Line height comes with each text size (text-body sets both).' },
+            {
+              pattern: modifier,
+              message: 'Opacity tints and line-height modifiers skip the contrast checks; add a token instead.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // The Foundations blocks draw swatches in the colours they document.
+    files: ['src/design-docs/**/*.tsx'],
+    rules: { 'no-restricted-syntax': 'off' },
   },
   {
     files: ['src/**/*.test.{ts,tsx}'],

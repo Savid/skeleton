@@ -1,0 +1,52 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+import * as Stories from './Colours.stories';
+
+<Meta of={Stories} />
+
+# Colours
+
+Every colour is a token, used as a Tailwind class: `bg-surface`, `text-muted`, `border-border-strong`, `text-danger`.
+Tailwind's own palette does not compile, and lint rejects colour literals, arbitrary values and opacity modifiers
+such as `bg-accent/10`: a tint is a colour no contrast check has seen. Each token has a light and a dark value; the
+tables show both.
+
+## Surfaces
+
+`background` is the page, `surface` a card, panel or header.
+
+<Story of={Stories.Surfaces} />
+
+## Lines
+
+`border` separates: card edges, rules, table rows. `border-strong` outlines something you can act on, such as a
+button, and reaches 3:1 on every surface.
+
+<Story of={Stories.Lines} />
+
+## Text
+
+`foreground` for content, `muted` for secondary text, labels and hints. Both reach 4.5:1 on every surface.
+
+<Story of={Stories.Text} />
+
+## Accent
+
+The brand colour: links, the product name and selected text. `accent-foreground` is text on an accent fill. `focus`
+is the focus ring; it follows `accent`, and `src/styles/base.css` draws it outside every `:focus-visible` element.
+
+<Story of={Stories.Accent} />
+
+## Status
+
+The outcome of anything: `ok`, `warn`, `danger`. They are text colours (4.5:1) and always come with a word or a mark.
+
+<Story of={Stories.Status} />
+
+## Contrast
+
+`tokens.test.ts` checks every rule below in both themes against WCAG 2.2 AA. A colour must be in a rule or exempt
+with a reason; the rules and exemptions live in `src/styles/tokens.ts`.
+
+<Story of={Stories.Contrast} />
+
+<Story of={Stories.Exempt} />

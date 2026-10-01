@@ -17,7 +17,11 @@ describe('AppShell', () => {
 
     expect(await screen.findByText('page body')).toBeInTheDocument();
     expect(screen.getByText('skeleton')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('href', '/');
+    const home = screen.getByRole('link', { name: 'Home' });
+    expect(home).toHaveAttribute('href', '/');
+    // The current page is marked by more than colour.
+    expect(home).toHaveAttribute('aria-current', 'page');
+    expect(home).toHaveClass('underline');
     expect(screen.getByText('reconnecting')).toHaveAttribute('data-tone', 'warn');
   });
 });

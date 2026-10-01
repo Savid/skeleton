@@ -1,0 +1,13 @@
+/* Storybook's stylesheet: the app's tokens and base styles, scanning all of
+ * src (the app's own stylesheet leaves out stories and the Foundations). */
+@import '../src/styles/tokens.css';
+@import '../src/styles/base.css';
+
+@source '../src';
+
+/* Docs pages frame each story in a white box of their own; paint it in the
+ * theme the toolbar chose, so a dark story is not drawn on white. */
+.docs-story {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

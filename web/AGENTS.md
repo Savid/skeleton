@@ -6,7 +6,7 @@
 pnpm dev          # Vite on :5173; /api/ proxies to skeletond (API=http://host:port to override)
 pnpm lint         # eslint, including prettier
 pnpm typecheck
-pnpm test         # unit tests (jsdom) and every story as a test (Chromium)
+pnpm test         # unit tests (jsdom) and every story in Chromium under each theme
 pnpm test:unit    # jsdom only; pnpm test:storybook for stories only
 pnpm test:coverage # unit tests with a v8 coverage report
 pnpm storybook    # component explorer on :6006
@@ -20,12 +20,13 @@ pnpm generate:api # regenerate src/api from ../api/openapi.yaml (or `make genera
 
 Versions are pinned in `package.json` and the lockfile.
 
-- Vite, React 19, TypeScript, Tailwind CSS 4, clsx
+- Vite, React 19, TypeScript, Tailwind CSS 4, clsx; eslint-plugin-better-tailwindcss
+  holds class names to the tokens
 - TanStack Router (file routes) and TanStack Query
 - hey-api generates the API client from the OpenAPI spec: types, Zod (mini)
   schemas, SDK functions and TanStack Query options
 - Vitest and Testing Library; Storybook 10 with addon-vitest (stories run as
-  browser tests), addon-a11y and MSW for API mocks
+  browser tests), addon-a11y, addon-themes and MSW for API mocks
 
 ## Structure
 
@@ -61,9 +62,10 @@ Versions are pinned in `package.json` and the lockfile.
   reading through `useQuery`. Add new events there, not in a second hook.
 - Import through `@/`, never `../`. Tests import helpers from `@/test-utils`.
 - Three TypeScript projects: `tsconfig.app.json` is the shipped app and
-  excludes tests, stories and test utilities; `tsconfig.test.json` adds the
-  test globals for those; `tsconfig.node.json` covers the config files. Test
-  types never leak into the app.
+  excludes tests, stories, test utilities, the token tooling and the
+  Foundations docs;
+  `tsconfig.test.json` adds the test globals for those; `tsconfig.node.json`
+  covers the config files. Test types never leak into the app.
 - MSW handlers and fixtures, typed with the generated types, live in
   `src/test-utils/handlers/`, one file per API domain, re-exported from its
   `index.ts`. Fixtures take their times from `@/test-utils/time` (`NOW_MS`,
@@ -71,13 +73,18 @@ Versions are pinned in `package.json` and the lockfile.
   and drive streams with `FakeEventSource`.
   A story that opens a stream needs an `sse()` handler from MSW (jsdom has no
   `EventSource`, so those are for stories only).
-- Design reference pages (MDX) live in `src/design-docs/`.
+- **Tokens:** `src/styles/` holds `tokens.css` (every design value),
+  `tokens.ts` (the colour names and contrast rules), `base.css` and the tooling
+  that checks them; the rules are in `.claude/rules/styling.md`. Tailwind scans
+  what each entry stylesheet names: `src/index.css` for the app,
+  `.storybook/preview.css` for Storybook.
+- **Foundations:** `src/design-docs/` holds the Storybook pages that document
+  the tokens; the page pattern is in `.claude/rules/storybook.md`.
 
 ## Rules
 
-- Colours come from the semantic tokens in `src/index.css` (`bg-surface`,
-  `text-muted`, `text-ok`, …), never raw palette classes or hex values.
-- React and hooks discipline: `.claude/rules/react.md`. Loading states:
-  `.claude/rules/loading-states.md`. Stories: `.claude/rules/storybook.md`.
+- Every value is a token: `.claude/rules/styling.md`. React and hooks
+  discipline: `.claude/rules/react.md`. Loading states: `.claude/rules/loading-states.md`.
+  Stories: `.claude/rules/storybook.md`.
 - Every component and page gets a test and stories. Run `pnpm lint`,
   `pnpm typecheck` and `pnpm test` before finishing.

@@ -1,0 +1,28 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+import * as Stories from './Typography.stories';
+
+<Meta of={Stories} />
+
+# Typography
+
+Two families: `font-sans` for everything, and `font-mono` for identifiers, versions, times and anything a reader might
+copy. Both are system stacks.
+
+<Story of={Stories.Families} />
+
+## Scale
+
+Sizes are named for their role, in rem so browser zoom and font settings apply. Each size carries its line height, so
+`text-body` sets both and lint rejects `leading-*`. `body` is the page default.
+
+<Story of={Stories.Scale} />
+
+<Story of={Stories.Sizes} />
+
+## Weights
+
+<Story of={Stories.Weights} />
+
+## Rules
+
+- Headings go in order (`h1` once per page, in `text-heading`), and their size follows their level.

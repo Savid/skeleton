@@ -74,7 +74,7 @@ fmt:
 	GOWORK=off golangci-lint fmt ./...
 	pnpm --dir web format
 
-## test: Go tests, web unit tests and every story as a browser test
+## test: Go tests, web unit tests, and every story as a browser test in each theme
 test: test-go test-web
 
 test-go: web-placeholder

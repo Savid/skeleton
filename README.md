@@ -28,8 +28,11 @@ What is in the box:
 - **UI.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router and Query,
   with not-found and error pages wired into the router. Every component has a
   props type, a test and stories; every story runs as a browser test with
-  accessibility checks; unmocked API calls fail tests; eslint warnings fail
-  lint.
+  accessibility checks in the light and dark themes; unmocked API calls fail
+  tests; eslint warnings fail lint.
+- **Design tokens.** One token file, with colours as light/dark pairs and
+  Tailwind's defaults removed, so only tokens compile. Tests check contrast in
+  both themes, and Storybook's Foundations pages document every token.
 - **Tooling.** golangci-lint (strict, with `depguard` and `forbidigo`
   guarding `pkg/`), eslint with the React Compiler rules, prettier, knip,
   Redocly, govulncheck and a tidy check; `make check` runs what CI runs.

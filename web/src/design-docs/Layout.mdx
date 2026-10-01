@@ -1,0 +1,20 @@
+import { Meta, Story } from '@storybook/addon-docs/blocks';
+import * as Stories from './Layout.stories';
+
+<Meta of={Stories} />
+
+# Layout
+
+## Spacing
+
+Spacing and sizing use Tailwind's 4px step: `p-1` is 4px, `gap-4` 16px, `px-6` 24px.
+
+## Widths
+
+Content widths are named for what they hold.
+
+<Story of={Stories.Widths} />
+
+## Radius
+
+<Story of={Stories.Radii} />

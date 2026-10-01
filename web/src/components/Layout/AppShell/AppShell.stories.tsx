@@ -9,7 +9,7 @@ const meta = {
   args: {
     name: 'skeleton',
     connection: 'live',
-    children: <p className="text-sm text-muted">Page content</p>,
+    children: <p className="text-body text-muted">Page content</p>,
   },
   argTypes: { connection: { control: 'inline-radio', options: ['connecting', 'live', 'reconnecting'] } },
 } satisfies Meta<typeof AppShell>;
