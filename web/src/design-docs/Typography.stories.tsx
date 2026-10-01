@@ -21,7 +21,7 @@ export const Families: Story = {
 };
 
 export const Scale: Story = {
-  render: () => <TypeScale sample="The quick brown fox checks the server's health" />,
+  render: () => <TypeScale sample="The quick brown fox jumps over the lazy dog" />,
 };
 
 export const Sizes: Story = {

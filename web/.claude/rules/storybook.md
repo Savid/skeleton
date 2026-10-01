@@ -1,5 +1,4 @@
 ---
-description: Storybook story conventions
 paths:
   - '**/src/**/*.stories.tsx'
   - '**/src/**/*.mdx'
@@ -8,31 +7,23 @@ paths:
 
 # Storybook
 
-- Every story is a test (`pnpm test:storybook`), run under each colour scheme
-  (the `storybook:dark` and `storybook:light` instances): it must render in
-  Chromium, pass its `play` function, log no console errors and have no
-  accessibility violations in either theme. Fix a failing story; never exclude
-  it.
-- Titles: reusable components `Components/<Category>/<Name>`; page-only parts
-  `Pages/<Section>/Components/<Name>`; full pages `Pages/<Section>/<Name>Page`;
-  design-system pages `Foundations/<Name>` (listed in `storySort` in
-  `.storybook/preview.tsx`). A Foundations page is `<Name>.mdx`, prose with
-  `<Story of={Stories.X} />` for every example, plus `<Name>.stories.tsx`,
-  whose stories hold the examples and are tagged `!dev`.
-- Export order is meaning; autodocs renders in it. `Default` first, then
-  variants, then states (`Loading`, `Empty`, `Error`, `Disabled` as they
-  apply), then edge cases (overflow, long identifiers, zero and huge counts),
-  then `…Interaction` play stories last. `Default`'s args drive the controls,
-  so controls must change what renders.
-- Fixtures and stories share one frozen clock: `NOW_MS` and `at()` from
-  `@/test-utils/time`. Never `Date.now()` or a literal date in a fixture.
-- Full-page stories use `tags: ['!autodocs']` and `layout: 'fullscreen'`.
-- Mock the API per story with `parameters.msw.handlers`, reusing the handlers
-  exported from `@/test-utils/handlers` (one file per API domain in
-  `src/test-utils/handlers/`). A story that opens an event stream mocks it with
-  an MSW `sse()` handler. An unmocked `/api/` request, including a stream a page
-  opens, fails the story.
-- One story per state that matters: loading uses a handler that never resolves
-  (`healthHandlers.pending`), errors use a failing one. Each `play` awaits the
-  exact state the story shows, with `findBy…` for async data.
-- Await every `expect` and `userEvent` in `play`.
+- Every story is a test in Chromium under each colour scheme
+  (`pnpm test:storybook`). A failed `play`, a console error, an accessibility
+  violation or an unmocked `/api/` request fails it. Fix the story; never
+  exclude it.
+- Titles: `Components/<Category>/<Name>`; page-only components
+  `Pages/<Section>/Components/<Name>`; pages `Pages/<Section>/<Name>Page`,
+  with `tags: ['!autodocs']` and `layout: 'fullscreen'`.
+- A Foundations page is `src/design-docs/<Name>.mdx` (prose, and a
+  `<Story of={Stories.X} />` for every example) plus `<Name>.stories.tsx`
+  (titled `Foundations/<Name>`, tagged `!dev`, holding the examples). List it
+  in `storySort` in `.storybook/preview.tsx`.
+- Export order is the docs order: `Default`, variants, states (`Loading`,
+  `Empty`, `Error`, `Disabled` as they apply), edge cases (overflow, long
+  identifiers, zero and huge counts), then `…Interaction` stories. `Default`'s
+  args drive the controls, so each control must change what renders.
+- Mock the API per story with `parameters.msw.handlers`, reusing
+  `@/test-utils/handlers`: the pending handler for loading, the failing one for
+  errors. A component that opens an event stream needs MSW's `sse()`.
+- Each `play` awaits the exact state its story shows, with `findBy…` for async
+  data. Await every `expect` and `userEvent`.

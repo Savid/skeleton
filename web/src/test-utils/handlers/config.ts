@@ -1,5 +1,5 @@
 import type { Config } from '@/api';
 
-// The root route reads this through useConfig; the page's injection normally
-// supplies it, so no story fetches it yet. Add MSW handlers here when one does.
+// The root route reads this through useConfig. The page's injection supplies
+// it, so stories don't fetch it.
 export const configFixture: Config = { name: 'skeleton', version: '0.1.0' };

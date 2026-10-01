@@ -85,6 +85,10 @@ each (the `go.mod` module path `github.com/savid/skeleton` reaches every
 import, `importguard.go` and `.golangci.yml`), rename `cmd/skeletond/`, then run
 `make generate`.
 
+The health check is the placeholder domain: `getHealth` and `Health` in the
+spec, the stream's `health` event (`internal/server/stream.go`), `HomePage` and
+`HealthCard`, and `test-utils/handlers/health.ts`. Replace it with yours.
+
 ## License
 
 [MIT](LICENSE)

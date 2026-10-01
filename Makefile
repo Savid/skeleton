@@ -28,10 +28,10 @@ image:
 run: build
 	$(BIN_DIR)/skeletond -listen $(LISTEN)
 
-## check: everything CI runs
+## check: lint, generated-code check, tests, govulncheck and tidy check
 check: lint generate-check test vuln tidy-check
 
-## audit: check, plus a clean rebuild of the UI to prove it embeds
+## audit: check, then build the real UI and embed it
 audit: check build-web
 	$(GO_BUILD) -o $(BIN_DIR)/skeletond ./cmd/skeletond
 
@@ -61,11 +61,11 @@ generate-check: generate
 		{ git status --short -- api/rest web/src/api; echo "generated code is stale: run make generate and commit it"; exit 1; }
 
 ## vuln: report known vulnerabilities in the Go dependency graph
-vuln:
+vuln: web-placeholder
 	$(GO) tool govulncheck ./...
 
 ## tidy-check: fail if go.mod or go.sum would change under go mod tidy
-tidy-check:
+tidy-check: web-placeholder
 	$(GO) mod tidy -diff
 	$(GO) mod verify
 

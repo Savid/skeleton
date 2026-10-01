@@ -11,7 +11,7 @@ info:
 servers:
   - url: /
     description: Same-origin API server
-# No authentication yet. Listen on loopback or a private network only.
+# No authentication. Listen on loopback or a private network only.
 security: []
 tags:
   - name: system

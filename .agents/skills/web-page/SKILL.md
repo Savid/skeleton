@@ -1,38 +1,27 @@
 ---
 name: web-page
-description: Add a page to the web UI — route file, page component, nav link and tests — following web/AGENTS.md. Use when asked to add a screen, view or page.
+description: Add a page to the web UI — route, page component, nav link, tests and stories. Use when asked to add a screen, view or page.
 ---
 
 # Add a web page
 
-Read [web/AGENTS.md](../../../web/AGENTS.md) first. It owns the structure and
-rules; this skill is the order of work.
+[web/AGENTS.md](../../../web/AGENTS.md) and its topic rules own the
+conventions; this is the order of work. Paths are under `web/`.
 
-1. **Name it.** Pick the URL (`/sessions`), the section folder (`sessions`) and
-   the page component (`SessionsPage`). Check `src/routes/` and `src/pages/` for
-   something to extend before adding.
-2. **Page.** Create `web/src/pages/<section>/<Name>Page.tsx`. Components used
-   only by this page go in `web/src/pages/<section>/components/`. Anything a
-   second page needs goes in `web/src/components/<Category>/<Name>/` with its
-   `.types.ts`, `.test.tsx`, `.stories.tsx` and `index.ts`.
-3. **Data.** Read through the generated query options
-   (`useQuery(getXOptions(...))` from `@/api/@tanstack/react-query.gen`). If the
-   operation doesn't exist yet, add it to `api/openapi.yaml`, run
-   `make generate`, and implement it on `operations` in `internal/server` with a
-   Go test. Live data arrives through `useEventStream` in `web/src/hooks/`,
-   which writes events into the query cache; add the event there.
-4. **Route.** Create `web/src/routes/<path>.tsx` that only sets `head` and
-   renders the page, like `routes/index.tsx`. The Vite plugin regenerates
-   `routeTree.gen.ts` on `pnpm dev` or `pnpm build`; include that change.
-5. **Nav.** Add a `Link` in `web/src/components/Layout/AppShell/AppShell.tsx`
-   if the page belongs in the top bar.
-6. **Tests.** `<Name>Page.test.tsx` beside the page, rendering through
-   `@/test-utils` with MSW handlers added by `server.use(...)`, and
-   `FakeEventSource` for streams. Cover loading, error and settled states.
-7. **Stories.** `<Name>Page.stories.tsx` titled `Pages/<Section>/<Name>Page`,
-   plus stories for each new component. Add MSW handlers and fixtures for the
-   new endpoint in `web/src/test-utils/handlers/<domain>.ts` (one handler per
-   state, times from `@/test-utils/time`), export them from `handlers/index.ts`,
-   and follow `web/.claude/rules/storybook.md`.
-8. **Check.** From the repo root: `make lint-web test-web`, plus
-   `make lint-api test-go` if you touched the spec or the server.
+1. **Name it.** Pick the URL, the section folder and the page component
+   (`<Name>Page`). If a page in `src/pages/` already covers it, extend that.
+2. **Data.** If the page needs an operation that does not exist, add it first
+   ([AGENTS.md](../../../AGENTS.md), API), with its handlers and fixture in
+   `src/test-utils/handlers/`.
+3. **Page.** `src/pages/<section>/<Name>Page.tsx`, its components and hooks
+   placed by the placement rule. Render every state in
+   `.claude/rules/loading-states.md`.
+4. **Route.** `src/routes/<path>.tsx` sets `head` and renders the page, like
+   `src/routes/index.tsx`. Run `pnpm exec vite build` to regenerate
+   `src/routeTree.gen.ts`, and commit it.
+5. **Nav.** If the page belongs in the top bar, add a `Link` in
+   `src/components/Layout/AppShell/AppShell.tsx`.
+6. **Tests and stories.** For the page and each new component, a test and
+   stories covering each state, titled per `.claude/rules/storybook.md`.
+7. **Check.** Run the lint and test targets for each side you touched
+   (AGENTS.md, Commands).

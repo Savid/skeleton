@@ -5,12 +5,9 @@ import { StatusBadge } from '@/components/Feedback/StatusBadge';
 import { formatAge } from '@/lib/format';
 import type { HealthCardProps } from './HealthCard.types';
 
-/** How often health is refetched; the event stream also writes it into the cache. */
-const REFRESH_MS = 10_000;
-
-/** The server's health: version and when it last answered. */
+/** The server's health: version and when it last answered. The event stream keeps it fresh. */
 export function HealthCard({ now }: HealthCardProps): JSX.Element {
-  const health = useQuery({ ...getHealthOptions(), refetchInterval: REFRESH_MS });
+  const health = useQuery(getHealthOptions());
 
   return (
     <section aria-labelledby="health-heading" className="rounded-md border border-border bg-surface p-5">

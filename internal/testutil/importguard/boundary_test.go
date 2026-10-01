@@ -49,12 +49,12 @@ func TestBoundaries(t *testing.T) {
 }
 
 // pkg/ holds decision packages that must stay free of the application, the
-// generated API and transport. Nothing lives there yet; the rule is armed.
+// generated API and transport. The test skips while pkg/ does not exist.
 func TestDecisionPackagesStayPure(t *testing.T) {
 	t.Parallel()
 
 	if _, err := os.Stat(filepath.Join(importguard.RepoRoot(t), "pkg")); os.IsNotExist(err) {
-		t.Skip("no pkg/ yet")
+		t.Skip("no pkg/ directory")
 	}
 
 	for _, p := range importguard.Packages(t, "./pkg/...") {

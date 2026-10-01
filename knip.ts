@@ -16,7 +16,7 @@ export default {
       entry: ['src/routes/**/*.tsx'],
       project: ['src/**/*.{ts,tsx,css,mdx}'],
       // Generated from api/openapi.yaml; it exports every operation and type
-      // whether or not the app uses it yet.
+      // whether or not the app uses it.
       ignore: ['src/api/**'],
     },
   },

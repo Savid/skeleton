@@ -40,7 +40,7 @@ func TestHandler(t *testing.T) {
 		cache      string
 	}{
 		{name: "root serves index with config", path: "/", status: http.StatusOK, body: injected, cache: "no-cache"},
-		{name: "client route falls back to index", path: "/sessions/42", status: http.StatusOK, body: injected, cache: "no-cache"},
+		{name: "client route falls back to index", path: "/items/42", status: http.StatusOK, body: injected, cache: "no-cache"},
 		{name: "directory falls back to index", path: "/assets/nested", status: http.StatusOK, body: "<title>app</title>", cache: "no-cache"},
 		{name: "fingerprinted asset is immutable", path: "/assets/app-1.js", status: http.StatusOK, body: "console.log(1)", cache: "public, max-age=31536000, immutable"},
 		{name: "static file", path: "/favicon.svg", status: http.StatusOK, body: "<svg/>"},

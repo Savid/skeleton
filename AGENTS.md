@@ -1,78 +1,76 @@
 # skeleton
 
-A Go daemon (`skeletond`) that serves a spec-first HTTP API and an embedded
-React UI from one binary. It is a starting point: replace the health endpoint
-and the home page with your domain, keep the layout and the rules.
-
-This repo contains:
-
-- `api/openapi.yaml`: the HTTP API, and the source of truth for both sides.
-  `api/rest/` is the ogen-generated server; never edit it.
-- `cmd/skeletond`: the daemon entry point: flags, wiring, shutdown
-- `internal/server`: the ogen operations, hand-routed event streams, problems,
-  the UI mount
-- `internal/ui`: serves the embedded single-page app
-- `internal/testutil/importguard`: lists packages and imports for boundary
-  tests; `boundary_test.go` there is the repository's dependency rules
-- `web/`: the UI (Vite, React, TanStack). Read [web/AGENTS.md](web/AGENTS.md)
-  before frontend work.
-
-Add a package under `internal/` per concern as the domain grows. Each
-package owns its goroutines, takes an injected `*slog.Logger`, and exposes a
-small interface that its consumers define on their side. A decision that
-should be a pure function of its inputs (a policy, a planner, a reducer) goes
-under `pkg/`: lint and the boundary test keep `pkg/` free of the application,
-transport, storage, the process clock and randomness, so it replays exactly.
+`skeletond` serves a spec-first HTTP API and an embedded React UI from one
+binary. [README.md](README.md) maps each part to its files. Before frontend
+work, read [web/AGENTS.md](web/AGENTS.md).
 
 ## Commands
 
-Run `pnpm install` once at the repo root before any frontend command.
+Run `pnpm install` at the repo root first. `make help` lists every target.
 
 ```bash
-make check            # everything CI runs: lint, generate-check, tests, govulncheck, tidy-check
-make audit            # check, then rebuild the UI and the binary with it embedded
-make generate         # regenerate api/rest and web/src/api after editing api/openapi.yaml
-make test-go          # go test -race ./...
-make lint-go          # golangci-lint
-make fmt              # gofumpt/goimports and prettier
-make run              # build and serve on 127.0.0.1:8080 (placeholder UI)
-make build WEB=1      # embed the real UI
-make image            # the container image
-pnpm --dir web dev    # Vite on :5173, proxying /api/ to a running skeletond
-make storybook        # component explorer on :6006
+make lint test      # both sides; lint-go/test-go or lint-web/test-web for one, lint-api for the spec
+make generate       # regenerate api/rest and web/src/api from api/openapi.yaml
+make check          # lint, generate-check, test, govulncheck, tidy-check
+make fmt            # gofumpt, goimports, prettier
+make run            # build and serve on 127.0.0.1:8080 with whatever web/dist holds
+make build WEB=1    # build the binary with the real UI embedded
 ```
+
+- Before finishing, run `make lint-<side> test-<side>` for each side you
+  touched.
+- `make generate-check` compares generated code with git, so it fails until
+  regenerated code is committed.
+- Run Go through `make`. Run directly, Go needs `GOWORK=off` and a `web/dist`
+  for `web/embed.go`: `make web-placeholder` creates a stub. Never commit
+  `web/dist`.
+
+## Layout
+
+- One package under `internal/` per concern. It owns its goroutines, takes an
+  injected `*slog.Logger` and returns concrete types; each consumer declares
+  the small interface it needs.
+- A decision that should be a pure function of its inputs (a policy, a
+  planner, a reducer) goes under `pkg/`. Lint and the boundary test keep `pkg/`
+  free of `internal/`, `api/`, `net/http`, `database/sql`, the process clock
+  and `rand`: pass time and randomness in.
+- To restrict who may import a package, add an entry to `boundaries` in
+  `internal/testutil/importguard/boundary_test.go`, and a `depguard` rule in
+  `.golangci.yml` when lint-time feedback helps.
+
+## API
+
+- `api/openapi.yaml` is the source of truth. `api/rest/` (ogen server) and
+  `web/src/api/` (hey-api client, types, Zod schemas) are generated from it:
+  never edit them; commit them.
+- To add or change an operation: edit the spec, run `make generate`, then
+  implement the method on `operations` in `internal/server` (the build fails
+  until it exists), with a Go test.
+- Paths live under `/api/v1/`; JSON fields are camelCase. Every operation's
+  `default` response is the RFC 9457 `Problem`. A handler returns
+  `problem(status, detail)` as its error for a client error; any other error
+  is logged and answered as a 500.
+- ogen cannot serve `text/event-stream`, so an event stream is declared in the
+  spec and hand-routed in `internal/server/server.go`. `TestEveryOperationIsServed`
+  fails until every operation is served with its declared content type. To add
+  an event: add its schema to the stream's response in the spec, send it from
+  `internal/server/stream.go`, and handle it in `web/src/hooks/useEventStream`.
+- `getConfig` is public and injected into `index.html`: nothing in it may be a
+  secret or need authentication.
+- Times in the API are UTC (`.UTC()`); the client's Zod schemas reject offsets.
+
+## Go
+
+- Use the injected logger and its `…Context` methods when a context is in
+  scope (sloglint). A request's context adds its ID to every line; never log
+  the ID by hand.
+- Where a test needs to control time, read it from an injected clock
+  (`Config.Now`), never `time.Now`.
 
 ## Rules
 
-- Go always runs with `GOWORK=off` (the Makefile sets it); a parent `go.work`
-  must never apply.
-- `web/embed.go` embeds `web/dist`. Go targets create a placeholder when it is
-  missing. Never commit `web/dist`.
-- The API is spec first. To add or change an operation: edit
-  `api/openapi.yaml`, run `make generate`, then implement the generated method
-  on `operations` in `internal/server` (the build fails until you do) with a
-  Go test. The web client, types and Zod schemas update from the same spec.
-  Commit generated code; CI fails when it is stale.
-- ogen cannot serve `text/event-stream`. An SSE operation is declared in the
-  spec and hand-routed in `internal/server/server.go`;
-  `TestEveryOperationIsServed` fails if any operation is not served.
-- Routes live under `/api/v1/`; JSON fields are camelCase; errors are RFC 9457
-  problems (`application/problem+json`).
-- `getConfig` is public and is injected into `index.html`; nothing in it may
-  be a secret or need authentication.
-- Loggers are injected `*slog.Logger`s, never the global one; use the
-  `…Context` methods when a context is in scope (`sloglint` enforces both).
-  Inside a request that context carries the request ID, and the server's
-  logger adds it to every line, so never log the ID by hand.
-- Time is injected where a test needs to control it (`Config.Now`), never
-  read from `time.Now` inside a handler. Times in the API are UTC: the
-  generated client's Zod schemas accept only the `Z` suffix.
-- Dependency boundaries are tests, not review notes. When a package must not
-  be imported outside a few places, add a line to `boundaries` in
-  `internal/testutil/importguard/boundary_test.go`; mirror it in
-  `.golangci.yml`'s `depguard` when lint-time feedback helps.
-- Fix lint findings rather than suppressing them. A `//nolint` names the linter
-  and says why.
-- Skills for repeated tasks live in `.agents/skills/` (also visible to Claude
-  Code through `.claude/skills`). Use [web-page](.agents/skills/web-page/SKILL.md)
-  to add a page.
+- Fix lint findings rather than suppressing them. A suppression covers one
+  line, names the rule and says why: `//nolint:<linter> // why`,
+  `// eslint-disable-next-line <rule> -- why`. Unused ones fail lint.
+- Skills for repeated tasks live in `.agents/skills/` (`.claude/skills` links
+  there). Add a page with [web-page](.agents/skills/web-page/SKILL.md).
