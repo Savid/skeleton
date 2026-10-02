@@ -63,6 +63,10 @@ pnpm format
 
 ## Tests
 
+- Vitest caps jsdom at four workers, then runs Storybook with two Chromium
+  pages per theme (four total). Browser test scripts raise
+  `VITEST_CHROMIUM_GC_DISK_THRESHOLD_GB` so Vitest's Linux workaround collects
+  Chromium garbage after each file; shared memory in a tmpfs `/tmp` uses RAM.
 - Unit tests render through `@/test-utils` (`render`, `renderHook`: a fresh
   query client and the app's routes) and add MSW handlers with
   `server.use(...)`; an unmocked request fails. `FakeEventSource` stands in

@@ -7,6 +7,10 @@ import path from 'path';
 
 const dirname = import.meta.dirname;
 
+// Package scripts raise VITEST_CHROMIUM_GC_DISK_THRESHOLD_GB so Vitest's
+// Linux workaround collects Chromium garbage after each file. Playwright
+// stores shared memory in /tmp, which consumes RAM when /tmp is a tmpfs.
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -14,6 +18,8 @@ export default defineConfig({
     },
   },
   test: {
+    // Bound jsdom workers even on machines with many CPU cores.
+    maxWorkers: 4,
     // Vitest stubs CSS imports; the token test reads tokens.css as text (`?raw`).
     css: { include: [/\/src\/styles\/tokens\.css/] },
     restoreMocks: true,
@@ -55,6 +61,10 @@ export default defineConfig({
         publicDir: path.join(dirname, '.storybook/public'),
         test: {
           name: 'storybook',
+          // Each theme becomes a project: two pages each, four in total.
+          maxWorkers: 2,
+          // Finish the jsdom project before opening Chromium pages.
+          sequence: { groupOrder: 1 },
           setupFiles: ['./.storybook/vitest-setup.ts'],
           browser: {
             enabled: true,
