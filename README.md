@@ -12,7 +12,7 @@ Clone it as a base, or lift a part below. Rules and layout:
 
 ## Quick start
 
-Go 1.27 and golangci-lint 2.14 (`.tool-versions`); Node 24 and pnpm 12
+Go 1.27 and golangci-lint 2.15 (`.tool-versions`); Node 26 and pnpm 12
 (`package.json`).
 
 ```bash

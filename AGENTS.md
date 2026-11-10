@@ -74,3 +74,6 @@ make build WEB=1    # build the binary with the real UI embedded
   `// eslint-disable-next-line <rule> -- why`. Unused ones fail lint.
 - Skills for repeated tasks live in `.agents/skills/` (`.claude/skills` links
   there). Add a page with [web-page](.agents/skills/web-page/SKILL.md).
+  pnpm links the skills that dependencies ship beside them (approved under
+  `permissions` in `pnpm-workspace.yaml`); those are gitignored links into
+  `node_modules`, so never edit them.

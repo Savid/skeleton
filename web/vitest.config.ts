@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { playwright } from '@vitest/browser-playwright';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
+import { msw } from 'msw/vite';
 import path from 'path';
 
 const dirname = import.meta.dirname;
@@ -56,9 +57,9 @@ export default defineConfig({
         extends: true,
         plugins: [
           tailwindcss(),
+          msw({ mode: 'worker-only' }),
           storybookTest({ configDir: path.join(dirname, '.storybook'), storybookScript: 'pnpm storybook' }),
         ],
-        publicDir: path.join(dirname, '.storybook/public'),
         test: {
           name: 'storybook',
           // Each theme becomes a project: two pages each, four in total.

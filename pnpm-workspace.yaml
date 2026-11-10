@@ -3,7 +3,26 @@ packages:
 
 saveExact: true
 
+# Refuse a version published with weaker provenance than an earlier one.
+trustPolicy: no-downgrade
+
 allowBuilds:
   '@tailwindcss/oxide': true
   esbuild: true
-  msw: true
+
+# Dependencies' approved agent skills are linked beside the repo's own;
+# .claude/skills links to this directory.
+skills:
+  dirs:
+    - .agents/skills
+
+overrides:
+  # @hey-api/json-schema-ref-parser pins js-yaml 4.2.0 exactly, which has
+  # quadratic-CPU advisories fixed in 4.3.2. Drop once it moves past that.
+  '@hey-api/json-schema-ref-parser>js-yaml': 4.3.2
+
+permissions:
+  '@tanstack/react-router':
+    skills: true
+  '@tanstack/router-plugin':
+    skills: true

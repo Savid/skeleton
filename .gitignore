@@ -23,3 +23,6 @@ node_modules/
 
 # Web coverage
 /web/coverage/
+
+# Vitest output (failure screenshots, attachments, reports)
+/web/.vitest/

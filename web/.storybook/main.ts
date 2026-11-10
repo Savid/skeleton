@@ -17,8 +17,6 @@ const config: StorybookConfig = {
   },
   // body paints bg-background from the tokens; a second background source would disagree.
   features: { backgrounds: false },
-  // Holds MSW's mockServiceWorker.js, kept out of the app build.
-  staticDirs: ['./public'],
 };
 
 export default config;

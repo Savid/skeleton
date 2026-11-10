@@ -5,7 +5,7 @@ import { FakeEventSource } from './event-source';
 import { server } from './server';
 
 // A request no test mocked is a defect, not a silent network call.
-beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
+beforeAll(() => server.listen({ onUnhandledFrame: 'error' }));
 afterAll(() => server.close());
 
 beforeEach(() => {

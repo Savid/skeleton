@@ -19,7 +19,7 @@ const unmockedApi = http.all('/api/*', ({ request }) => {
 
 async function startWorker(): Promise<SetupWorker> {
   const worker = setupWorker(unmockedApi);
-  await worker.start({ onUnhandledRequest: 'bypass', quiet: true });
+  await worker.start({ onUnhandledFrame: 'bypass', quiet: true });
   return worker;
 }
 
