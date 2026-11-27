@@ -102,7 +102,8 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	mux.Handle("/", app)
 
 	s.http = &http.Server{
-		Handler:           withRequestID(accessLog(log, mux)),
+		// Refusals are logged with their request ID and carry the headers too.
+		Handler:           withRequestID(accessLog(log, securityHeaders(crossOriginProtection(mux)))),
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       2 * time.Minute,
 		// No WriteTimeout: event streams are long-lived and bound each write
@@ -114,8 +115,8 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	return s, nil
 }
 
-// Handler returns the served handler (the route table behind the access
-// log), for tests.
+// Handler returns the served handler (the route table behind the request
+// ID, access log and security middleware), for tests.
 func (s *Server) Handler() http.Handler {
 	return s.http.Handler
 }

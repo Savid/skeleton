@@ -133,3 +133,69 @@ func TestProblemBody(t *testing.T) {
 		t.Errorf("problem = %+v", p)
 	}
 }
+
+// Every response, the API's, the spec's, the page's and a problem's, carries
+// the security headers.
+func TestSecurityHeaders(t *testing.T) {
+	t.Parallel()
+
+	h := newTestServer(t).Handler()
+	want := map[string]string{
+		"X-Content-Type-Options":       "nosniff",
+		"Referrer-Policy":              "no-referrer",
+		"X-Frame-Options":              "DENY",
+		"Cross-Origin-Opener-Policy":   "same-origin",
+		"Cross-Origin-Resource-Policy": "same-origin",
+	}
+
+	for _, path := range []string{"/api/v1/health", "/openapi.yaml", "/", "/api/v1/missing"} {
+		rec := get(t, h, http.MethodGet, path)
+		for name, value := range want {
+			if got := rec.Header().Get(name); got != value {
+				t.Errorf("GET %s: %s = %q, want %q", path, name, got, value)
+			}
+		}
+	}
+
+	if csp := get(t, h, http.MethodGet, "/").Header().Get("Content-Security-Policy"); !strings.Contains(csp, "default-src 'self'") {
+		t.Errorf("page Content-Security-Policy = %q", csp)
+	}
+}
+
+// A browser's cross-origin write is refused with a problem before routing; a
+// same-origin or non-browser one reaches the API (which has no writes yet,
+// so it answers 405), and reads pass from anywhere.
+func TestCrossOriginWritesRefused(t *testing.T) {
+	t.Parallel()
+
+	h := newTestServer(t).Handler()
+
+	for name, tc := range map[string]struct {
+		method, site string
+		status       int
+	}{
+		"cross-site write": {http.MethodPost, "cross-site", http.StatusForbidden},
+		"same-origin":      {http.MethodPost, "same-origin", http.StatusMethodNotAllowed},
+		"not a browser":    {http.MethodPost, "", http.StatusMethodNotAllowed},
+		"cross-site read":  {http.MethodGet, "cross-site", http.StatusOK},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			rec := httptest.NewRecorder()
+			req := httptest.NewRequestWithContext(t.Context(), tc.method, "/api/v1/health", nil)
+			if tc.site != "" {
+				req.Header.Set("Sec-Fetch-Site", tc.site)
+			}
+			h.ServeHTTP(rec, req)
+
+			if rec.Code != tc.status {
+				t.Fatalf("%s with Sec-Fetch-Site %q = %d, want %d", tc.method, tc.site, rec.Code, tc.status)
+			}
+
+			if tc.status == http.StatusForbidden && rec.Header().Get("Content-Type") != "application/problem+json" {
+				t.Errorf("refusal Content-Type = %q, want application/problem+json", rec.Header().Get("Content-Type"))
+			}
+		})
+	}
+}

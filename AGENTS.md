@@ -60,6 +60,9 @@ make build WEB=1    # build the binary with the real UI embedded
   fails until every operation is served with its declared content type. To add
   an event: add its schema to the stream's response in the spec, send it from
   `internal/server/stream.go`, and handle it in `web/src/hooks/useEventStream`.
+- A browser's cross-origin POST, PUT, PATCH or DELETE is refused before
+  routing (`internal/server/security.go`). Never change state on GET, HEAD or
+  OPTIONS: those always pass.
 - `getConfig` is public and injected into `index.html`: nothing in it may be a
   secret or need authentication.
 - Times in the API are UTC (`.UTC()`); the client's Zod schemas reject offsets.

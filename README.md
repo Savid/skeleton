@@ -37,6 +37,12 @@ What each does, and where it lives.
 - **Daemon.** Flags, slog (text or JSON), graceful shutdown, RFC 9457 problem
   errors. `cmd/skeletond/`, `internal/server/{server,operations}.go`,
   `web/src/lib/problem.ts`.
+- **Browser hardening.** Every response refuses sniffing, framing, referrers
+  and cross-origin reads; a browser's cross-origin write is refused as a 403
+  problem (`http.CrossOriginProtection`), since nothing authenticates it. The
+  page's Content-Security-Policy allows same-origin resources and, by hash,
+  the injected configuration, nothing else inline. `internal/server/security.go`,
+  `internal/ui/handler.go`. Stdlib only.
 - **Config in the page.** `getConfig`'s JSON is injected into `index.html`;
   the UI validates it and seeds the query cache before the first render.
   `internal/ui/handler.go` (`Inject`), `web/index.html`,
