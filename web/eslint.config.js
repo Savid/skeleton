@@ -49,8 +49,8 @@ export default defineConfig(
       '@eslint-react/exhaustive-deps': 'off',
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
-      // React Compiler static analysis. The compiler is not enabled in the
-      // build; these rules are a lint-time guard only.
+      // React Compiler static analysis: the compiler runs in the build, the
+      // tests and Storybook, and these rules keep code it can compile.
       'react-hooks/preserve-manual-memoization': 'error',
       'react-hooks/immutability': 'error',
       'react-hooks/refs': 'error',

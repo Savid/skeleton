@@ -70,8 +70,8 @@ What each does, and where it lives.
 - **Import boundaries.** Who may import what, as a Go test, with lint twins.
   `internal/testutil/importguard/`, `api/generation_test.go`, `.golangci.yml`
   (`depguard`, `forbidigo`).
-- **Web stack.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router (file
-  routes) and Query, not-found and error pages. `web/src/{routes,pages,components}/`,
+- **Web stack.** Vite, React 19 with React Compiler, TypeScript, Tailwind 4,
+  TanStack Router (file routes) and Query, not-found and error pages. `web/src/{routes,pages,components}/`,
   `web/src/main.tsx`.
 - **Design tokens.** One `@theme` of light/dark colour pairs and sizes with
   Tailwind's defaults removed, so only tokens compile; tests check contrast in

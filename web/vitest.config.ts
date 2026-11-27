@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
-import react from '@vitejs/plugin-react';
+import babel from '@rolldown/plugin-babel';
+import react, { reactCompilerPreset } from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { playwright } from '@vitest/browser-playwright';
 import { storybookTest } from '@storybook/addon-vitest/vitest-plugin';
@@ -42,7 +43,8 @@ export default defineConfig({
       {
         // Component and page tests in jsdom.
         extends: true,
-        plugins: [react()],
+        // Tests run what ships: compiled by React Compiler, as vite.config.ts builds.
+        plugins: [react(), babel({ presets: [reactCompilerPreset()] })],
         test: {
           name: 'unit',
           environment: 'jsdom',
