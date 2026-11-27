@@ -18,7 +18,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "generate:api": "openapi-ts",
-    "test:coverage": "vitest run --project unit --coverage"
+    "test:coverage": "vitest run --project unit --coverage",
+    "smoke": "node e2e/smoke.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "5.108.4",

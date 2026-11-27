@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help build image run check audit lint lint-go lint-web lint-api generate generate-check vuln tidy-check fmt test test-go test-web storybook install-frontend build-web web-assets web-placeholder clean
+.PHONY: help build image run check audit smoke lint lint-go lint-web lint-api generate generate-check vuln tidy-check fmt test test-go test-web storybook install-frontend build-web web-assets web-placeholder clean
 
 BIN_DIR ?= build/bin
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
@@ -31,9 +31,13 @@ run: build
 ## check: lint, generated-code check, tests, govulncheck and tidy check
 check: lint generate-check test vuln tidy-check
 
-## audit: check, then build the real UI and embed it
-audit: check build-web
-	$(GO_BUILD) -o $(BIN_DIR)/skeletond ./cmd/skeletond
+## audit: check, then the smoke test of the built binary
+audit: check smoke
+
+## smoke: build skeletond with the real UI and check its page in Chromium, under its CSP
+smoke:
+	@$(MAKE) --no-print-directory build WEB=1
+	pnpm --dir web smoke $(abspath $(BIN_DIR)/skeletond)
 
 ## lint: golangci-lint; eslint, tsc, prettier and knip; Redocly on the spec
 lint: lint-go lint-web lint-api

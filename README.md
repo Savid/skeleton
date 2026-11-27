@@ -45,10 +45,13 @@ What each does, and where it lives.
   a web page could abuse: a Host it was not given (DNS rebinding; IPs and
   localhost pass, `-allowed-host` adds names) and a browser's cross-origin
   write (`http.CrossOriginProtection`), each as a 403 problem. Every response
-  refuses sniffing, framing, cross-origin referrers and reads; the page's
+  refuses sniffing, framing, cross-origin referrers and reads, and powerful
+  browser features; API answers are never cached. The page's
   Content-Security-Policy allows same-origin resources and, by hash, the
-  injected configuration, nothing else inline. `internal/server/security.go`,
-  `internal/ui/handler.go`. Stdlib only.
+  injected configuration, nothing else inline, and enforces Trusted Types;
+  `make smoke` runs the built UI under it in Chromium.
+  `internal/server/security.go`, `internal/ui/handler.go`, `web/e2e/`.
+  Stdlib only.
 - **Config in the page.** `getConfig`'s JSON is injected into `index.html`;
   the UI validates it and seeds the query cache before the first render.
   `internal/ui/handler.go`, `web/index.html`,

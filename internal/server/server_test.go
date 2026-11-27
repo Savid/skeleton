@@ -162,30 +162,35 @@ func TestSecurityHeaders(t *testing.T) {
 		"X-Frame-Options":              "DENY",
 		"Cross-Origin-Opener-Policy":   "same-origin",
 		"Cross-Origin-Resource-Policy": "same-origin",
+		"Permissions-Policy":           permissionsPolicy,
 	}
 
 	cancelled, cancel := context.WithCancel(t.Context())
 	cancel()
 
+	// cache is the Cache-Control each answers with: API answers are never
+	// stored, the stream keeps its own no-cache, the page is revalidated.
 	for name, tc := range map[string]struct {
 		build  func(r *http.Request)
 		status int
 		page   bool
+		cache  string
 	}{
-		"api":     {func(r *http.Request) { r.URL.Path = "/api/v1/health" }, http.StatusOK, false},
-		"spec":    {func(r *http.Request) { r.URL.Path = "/openapi.yaml" }, http.StatusOK, false},
-		"page":    {func(*http.Request) {}, http.StatusOK, true},
-		"head":    {func(r *http.Request) { r.Method = http.MethodHead }, http.StatusOK, true},
-		"problem": {func(r *http.Request) { r.URL.Path = "/api/v1/missing" }, http.StatusNotFound, false},
+		"api":     {func(r *http.Request) { r.URL.Path = "/api/v1/health" }, http.StatusOK, false, "no-store"},
+		"spec":    {func(r *http.Request) { r.URL.Path = "/openapi.yaml" }, http.StatusOK, false, ""},
+		"page":    {func(*http.Request) {}, http.StatusOK, true, "no-cache"},
+		"head":    {func(r *http.Request) { r.Method = http.MethodHead }, http.StatusOK, true, "no-cache"},
+		"problem": {func(r *http.Request) { r.URL.Path = "/api/v1/missing" }, http.StatusNotFound, false, "no-store"},
 		"stream": {func(r *http.Request) {
 			*r = *r.WithContext(cancelled)
 			r.URL.Path = "/api/v1/stream"
-		}, http.StatusOK, false},
+		}, http.StatusOK, false, "no-cache"},
 		"cross-origin refusal": {func(r *http.Request) {
 			r.Method = http.MethodPost
+			r.URL.Path = "/api/v1/health"
 			r.Header.Set("Sec-Fetch-Site", "cross-site")
-		}, http.StatusForbidden, false},
-		"host refusal": {func(r *http.Request) { r.Host = "rebound.example" }, http.StatusForbidden, false},
+		}, http.StatusForbidden, false, "no-store"},
+		"host refusal": {func(r *http.Request) { r.Host = "rebound.example" }, http.StatusForbidden, false, ""},
 	} {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
@@ -199,6 +204,10 @@ func TestSecurityHeaders(t *testing.T) {
 				if got := rec.Header().Get(header); got != value {
 					t.Errorf("%s = %q, want %q", header, got, value)
 				}
+			}
+
+			if got := rec.Header().Get("Cache-Control"); got != tc.cache {
+				t.Errorf("Cache-Control = %q, want %q", got, tc.cache)
 			}
 
 			// The page has its own policy; everything else gets one that allows nothing.

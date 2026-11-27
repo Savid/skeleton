@@ -9,11 +9,16 @@ import (
 	"strings"
 )
 
+// permissionsPolicy turns off the powerful browser features the UI does not
+// use, for it and anything it embeds. Grant one here when a page needs it.
+const permissionsPolicy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), serial=(), hid=(), display-capture=()"
+
 // securityHeaders sets what every response carries: no MIME sniffing, no
-// referrer sent to another origin, no framing, and no reading or embedding
-// of the daemon's responses by another origin's pages. Responses that are
-// not the UI's get a CSP that allows nothing; the UI handler replaces it
-// with the page's own.
+// referrer sent to another origin, no framing, no reading or embedding of
+// the daemon's responses by another origin's pages, and no powerful browser
+// features. Responses that are not the UI's get a CSP that allows nothing;
+// the UI handler replaces it with the page's own. API responses are never
+// stored by a cache; the event stream sets its own no-cache.
 //
 // Referrer-Policy is same-origin, not no-referrer: under no-referrer a
 // browser sends `Origin: null` on a same-origin form post, which
@@ -28,6 +33,12 @@ func securityHeaders(next http.Handler) http.Handler {
 		h.Set("Cross-Origin-Opener-Policy", "same-origin")
 		h.Set("Cross-Origin-Resource-Policy", "same-origin")
 		h.Set("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'")
+		h.Set("Permissions-Policy", permissionsPolicy)
+
+		if r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/api/") {
+			h.Set("Cache-Control", "no-store")
+		}
+
 		next.ServeHTTP(w, r)
 	})
 }

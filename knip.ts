@@ -10,7 +10,7 @@ export default {
   // CI runs package scripts as `pnpm --dir web <script>`, which knip reads as
   // bare binaries; every name here is a script in web/package.json, except
   // `playwright`, web's dependency reached through `pnpm --dir web exec`.
-  ignoreBinaries: ['lint', 'typecheck', 'build', 'build-storybook', 'playwright'],
+  ignoreBinaries: ['lint', 'typecheck', 'build-storybook', 'playwright'],
   workspaces: {
     web: {
       entry: ['src/routes/**/*.tsx'],

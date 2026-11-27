@@ -163,7 +163,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['*.config.{js,ts}', '.storybook/*.ts'],
+    files: ['*.config.{js,ts}', '.storybook/*.ts', 'e2e/**/*.ts'],
     languageOptions: {
       globals: globals.node,
     },

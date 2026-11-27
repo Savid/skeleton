@@ -21,8 +21,11 @@ const Placeholder = "<!--config-->"
 
 // policy is the Content-Security-Policy of everything the handler serves:
 // the app's own scripts, styles, images and API, nothing inline, no plugins,
-// no <base>, no framing. The page adds the injected script by its hash.
-const policy = "default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'"
+// no <base>, no framing, and Trusted Types for the DOM's script sinks
+// (innerHTML, eval and the like throw unless a named policy made the value).
+// The page adds the injected script by its hash.
+const policy = "default-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; " +
+	"require-trusted-types-for 'script'"
 
 // Config returns the public configuration as JSON, for injection into
 // index.html as window.__CONFIG__. The UI seeds its query cache from it, so

@@ -12,6 +12,7 @@ Run `pnpm install` at the repo root first. `make help` lists every target.
 make lint test      # both sides; lint-go/test-go or lint-web/test-web for one, lint-api for the spec
 make generate       # regenerate api/rest and web/src/api from api/openapi.yaml
 make check          # lint, generate-check, test, govulncheck, tidy-check
+make smoke          # build with the real UI and check the served page in Chromium
 make fmt            # gofumpt, goimports, prettier
 make run            # build and serve on 127.0.0.1:8080 with whatever web/dist holds
 make build WEB=1    # build the binary with the real UI embedded
