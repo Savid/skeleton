@@ -79,8 +79,10 @@ What each does, and where it lives.
   `web/src/design-docs/`, `web/.claude/rules/styling.md`.
 - **Tests.** Go with `-race`; Vitest in jsdom; every story in Chromium under
   each colour scheme, failing on accessibility violations, console errors and
-  unmocked `/api/` calls; MSW handlers shared by both. `web/vitest.config.ts`,
-  `web/.storybook/`, `web/src/test-utils/`.
+  unmocked `/api/` calls; MSW handlers shared by both; the event stream's
+  schedule on a fake clock (`testing/synctest`); and `make smoke`, the built
+  binary's page in Chromium. `web/vitest.config.ts`, `web/.storybook/`,
+  `web/src/test-utils/`, `web/e2e/`.
 - **Lint.** golangci-lint, eslint (React Compiler, token-only classes, zero
   warnings), prettier, knip, Redocly, govulncheck, tidy check. `.golangci.yml`,
   `web/eslint.config.js`, `knip.ts`, `.redocly.yaml`.

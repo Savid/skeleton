@@ -2,91 +2,138 @@ package server
 
 import (
 	"bufio"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"strings"
 	"testing"
+	"testing/synctest"
+	"time"
 
 	"github.com/savid/skeleton/api/rest"
 )
 
-type event struct {
-	name string
-	data []byte
+// frame is one line of the stream and how long after connecting it arrived.
+type frame struct {
+	at   time.Duration
+	line string
 }
 
-// readEvents reads frames from the stream until n events have arrived.
-func readEvents(t *testing.T, base string, n int) (retry string, events []event) {
+// The stream sends its retry hint and a health event on connect, a health
+// event every 5 s (the default StreamInterval) and a ping comment every 15 s,
+// on the real schedule: the test runs in a synctest bubble, where time is
+// fake and the network in memory, so it takes no time and cannot flake.
+func TestStreamEvents(t *testing.T) {
+	t.Parallel()
+
+	synctest.Test(t, func(t *testing.T) {
+		frames := readUntilPing(t, openStream(t))
+
+		if len(frames) < 2 || frames[0] != (frame{0, "retry: 2000"}) || frames[1] != (frame{0, "event: health"}) {
+			t.Fatalf("stream opened with %v, want the retry hint then a health event at once", frames)
+		}
+
+		// The third interval's health event ties with the ping, so it may
+		// come either side of it.
+		want := []time.Duration{0, 5 * time.Second, 10 * time.Second}
+		if got := healthTimes(t, frames); !slices.Equal(got[:min(len(got), len(want))], want) {
+			t.Errorf("health events at %v, want %v", got, want)
+		}
+
+		// Under the 30 s and longer idle timeouts of common proxies.
+		if last := frames[len(frames)-1]; last.at != 15*time.Second {
+			t.Errorf("ping at %v, want 15s", last.at)
+		}
+	})
+}
+
+// openStream serves a daemon with the default stream settings on the
+// in-memory network and opens its event stream. Closing the body at the end
+// of the test ends the stream.
+func openStream(t *testing.T) io.Reader {
 	t.Helper()
 
-	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, base+"/api/v1/stream", nil)
+	// The in-memory network addresses the server as example.com.
+	s, err := New(slog.New(slog.DiscardHandler), Config{
+		Listen: "127.0.0.1:0", AllowedHosts: []string{"example.com"}, Version: "test",
+		Now: func() time.Time { return testNow },
+	}, testAssets)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	ts := httptest.NewTestServer(t, s.Handler())
+	client := ts.Client() // starts it, on the in-memory network
+
+	req, err := http.NewRequestWithContext(t.Context(), http.MethodGet, ts.URL+"/api/v1/stream", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	defer func() { _ = resp.Body.Close() }()
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Cleanup(func() { _ = resp.Body.Close() })
 
 	if resp.StatusCode != http.StatusOK || resp.Header.Get("Content-Type") != "text/event-stream" {
 		t.Fatalf("stream = %d %q", resp.StatusCode, resp.Header.Get("Content-Type"))
 	}
 
-	lines := bufio.NewScanner(resp.Body)
+	return resp.Body
+}
 
-	var ev event
+// readUntilPing reads the stream's non-empty lines, each with its arrival
+// time, up to and including the first ping.
+func readUntilPing(t *testing.T, body io.Reader) []frame {
+	t.Helper()
 
-	for len(events) < n && lines.Scan() {
-		line := lines.Text()
-		switch {
-		case strings.HasPrefix(line, "retry: "):
-			retry = strings.TrimPrefix(line, "retry: ")
-		case strings.HasPrefix(line, "event: "):
-			ev.name = strings.TrimPrefix(line, "event: ")
-		case strings.HasPrefix(line, "data: "):
-			ev.data = []byte(strings.TrimPrefix(line, "data: "))
-		case line == "" && ev.data != nil:
-			events = append(events, ev)
-			ev = event{}
+	start := time.Now()
+	lines := bufio.NewScanner(body)
+
+	var frames []frame
+
+	for lines.Scan() {
+		if line := lines.Text(); line != "" {
+			frames = append(frames, frame{time.Since(start), line})
+			if line == ": ping" {
+				return frames
+			}
 		}
 	}
 
-	if len(events) < n {
-		t.Fatalf("stream ended after %d events: %v", len(events), lines.Err())
-	}
+	t.Fatalf("stream ended before a ping (%v): %v", lines.Err(), frames)
 
-	return retry, events
+	return nil
 }
 
-// The stream sends its retry hint, then a health event on connect and again
-// on every interval.
-func TestStreamEvents(t *testing.T) {
-	t.Parallel()
+// healthTimes decodes each data line as a Health, checks it, and returns when
+// each arrived.
+func healthTimes(t *testing.T, frames []frame) []time.Duration {
+	t.Helper()
 
-	ts := httptest.NewServer(newTestServer(t).Handler())
-	defer ts.Close()
+	var times []time.Duration
 
-	retry, events := readEvents(t, ts.URL, 2)
-
-	if retry != "2000" {
-		t.Errorf("retry = %q, want 2000", retry)
-	}
-
-	for _, ev := range events {
-		if ev.name != "health" {
-			t.Fatalf("event = %q, want health", ev.name)
+	for _, f := range frames {
+		data, ok := strings.CutPrefix(f.line, "data: ")
+		if !ok {
+			continue
 		}
 
 		var h rest.Health
-		if err := h.UnmarshalJSON(ev.data); err != nil {
-			t.Fatal(err)
+		if err := h.UnmarshalJSON([]byte(data)); err != nil {
+			t.Fatalf("health at %v: %v", f.at, err)
 		}
 
 		if h.Version != "test" || !h.At.Equal(testNow) {
-			t.Errorf("health = %+v", h)
+			t.Errorf("health at %v = %+v", f.at, h)
 		}
+
+		times = append(times, f.at)
 	}
+
+	return times
 }
