@@ -23,9 +23,12 @@ make build WEB=1    # build the binary with the real UI embedded
   regenerated code is committed.
 - Toolchain pins, each bumped in every place it appears: Go in `go.mod`,
   `.tool-versions` and the `Dockerfile`; golangci-lint in `.tool-versions` and
-  CI; Node in `package.json` `devEngines` only (pnpm installs it, and runs every
-  script with it; CI reads it); pnpm in `packageManager` and the `Dockerfile`.
-  Images are pinned by tag and digest, actions by commit.
+  CI; Node in `package.json` `devEngines.runtime` only (pnpm installs it and
+  runs every pnpm command and script with it, `make` included; CI reads it);
+  pnpm in `packageManager` (not `devEngines.packageManager`, which a global
+  pnpm 10 ignores, so it never switches) and the `Dockerfile`. Images, the
+  Dockerfile frontend included, are pinned by tag and digest, actions by
+  commit; nothing bumps them for you.
 - Run Go through `make`. Run directly, Go needs `GOWORK=off` and a `web/dist`
   for `web/embed.go`: `make web-placeholder` creates a stub. Never commit
   `web/dist`.

@@ -2,11 +2,9 @@ module github.com/savid/skeleton
 
 go 1.27.4
 
-// pnpm's dependency trees: never Go packages, and full of symlinks.
-ignore (
-	./node_modules
-	./web/node_modules
-)
+// pnpm's dependency trees, at any depth: never Go packages, and full of
+// symlinks.
+ignore node_modules
 
 tool (
 	github.com/ogen-go/ogen/cmd/ogen
@@ -26,7 +24,7 @@ require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/kr/pretty v0.3.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect

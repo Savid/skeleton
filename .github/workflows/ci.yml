@@ -27,12 +27,12 @@ jobs:
       - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
         with:
           go-version-file: go.mod
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      # pnpm from packageManager, verified against npm's signature; the Node
+      # that devEngines pins; the store cache; then a frozen install.
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         with:
-          node-version-file: package.json
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: true
+          require-lockfile: true
       - run: pnpm lint:api
       # Generated code is committed; it must match what the spec produces.
       - run: make generate-check
@@ -62,27 +62,28 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+      # pnpm from packageManager, verified against npm's signature; the Node
+      # that devEngines pins; the store cache; then a frozen install.
+      - uses: pnpm/setup@731dfb6463bbd11c11fd0ee11fe00ed0e36d48a1 # v3.2.0
         with:
-          node-version-file: package.json
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+          cache: true
+          require-lockfile: true
       - run: pnpm --dir web lint
       - run: pnpm --dir web typecheck
       - run: pnpm --dir web format:check
       - run: pnpm knip
-      # Story tests run in Chromium. The browser download is keyed on the
-      # Playwright version, so it is fetched once per bump, not per run.
+      # Story tests run in headless Chromium, which is the headless shell
+      # alone. The download is keyed on the Playwright version, so it is
+      # fetched once per bump, not per run.
       - id: playwright
         run: echo "version=$(jq -r .devDependencies.playwright web/package.json)" >> "$GITHUB_OUTPUT"
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: browsers
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+          key: playwright-shell-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
       - if: steps.browsers.outputs.cache-hit != 'true'
-        run: pnpm --dir web exec playwright install --with-deps chromium
+        run: pnpm --dir web exec playwright install --with-deps --only-shell chromium
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: pnpm --dir web exec playwright install-deps chromium
       - run: pnpm --dir web test

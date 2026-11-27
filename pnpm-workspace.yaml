@@ -6,9 +6,16 @@ saveExact: true
 # Refuse a version published with weaker provenance than an earlier one.
 trustPolicy: no-downgrade
 
+# Refuse a version less than a day old when resolving. pnpm defaults to the
+# same age but falls back to a younger version when none is old enough, which
+# with exact pins means always; setting it makes the check strict. List a
+# package in minimumReleaseAgeExclude to take an urgent fix sooner.
+minimumReleaseAge: 1440
+
+# No dependency runs an install script. esbuild's postinstall only speeds up
+# its CLI; Vite and Storybook use its API, which is as fast without it.
 allowBuilds:
-  '@tailwindcss/oxide': true
-  esbuild: true
+  esbuild: false
 
 # Dependencies' approved agent skills are linked beside the repo's own;
 # .claude/skills links to this directory.
@@ -22,9 +29,11 @@ overrides:
   '@hey-api/json-schema-ref-parser>js-yaml': 4.3.2
   # Storybook pins this docgen plugin to ^0.7.0, which takes glob 13 and so
   # minimatch 10, both with advisories (GHSA-3g3m-2fjr-6pw4,
-  # GHSA-g3hv-75wg-m249). Its one globSync call works the same on glob 14.
-  # Plugin 0.8+ drops glob but lost npm provenance, which trustPolicy refuses.
-  # Drop once @storybook/react-vite takes a plugin past glob 13.
+  # GHSA-g3hv-75wg-m249). Its one globSync call works the same on glob 14,
+  # and Storybook loads it only for reactDocgen 'react-docgen-typescript'.
+  # Plugin 0.9.1 drops glob, but 0.8.0 on were published without provenance
+  # by a changed trusted publisher, so trustPolicy will refuse the plugin when
+  # Storybook moves past 0.7: review it then. Drop once Storybook does.
   '@joshwooding/vite-plugin-react-docgen-typescript>glob': 14.0.6
 
 peerDependencyRules:

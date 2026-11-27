@@ -12,8 +12,12 @@ Clone it as a base, or lift a part below. Rules and layout:
 
 ## Quick start
 
-Go 1.27 and golangci-lint 2.15 (`.tool-versions`), and pnpm 12, which
-installs and runs the Node 26 that `package.json` pins (`devEngines`).
+Go 1.27 and golangci-lint 2.15 (`.tool-versions`), and pnpm 12
+([standalone install](https://pnpm.io/installation) needs no Node). pnpm
+downloads the Node 26 that `package.json` pins (`devEngines`) and runs every
+pnpm command and `make` target with it; a bare `node` or an editor uses
+whatever is on `PATH`, and npm refuses to run in the repo on another Node.
+Behind a proxy or offline, set pnpm's `nodeDownloadMirrors`.
 
 ```bash
 pnpm install
@@ -77,9 +81,11 @@ What each does, and where it lives.
 - **Lint.** golangci-lint, eslint (React Compiler, token-only classes, zero
   warnings), prettier, knip, Redocly, govulncheck, tidy check. `.golangci.yml`,
   `web/eslint.config.js`, `knip.ts`, `.redocly.yaml`.
-- **Image and CI.** Static binary on distroless, nonroot; base images pinned by
-  digest and actions by commit. CI runs api, go, web and image jobs and builds
-  the image without pushing it. `Dockerfile`, `.github/workflows/ci.yml`.
+- **Image and CI.** Static binary on distroless, nonroot, cross-built for any
+  architecture without emulation; base images pinned by digest and actions by
+  commit. Reached by a name (a proxy, a service name), the container needs
+  `-allowed-host <name>`. CI runs api, go, web and image jobs and builds the
+  image without pushing it. `Dockerfile`, `.github/workflows/ci.yml`.
 - **Agent guidance.** `AGENTS.md`, `web/AGENTS.md`, `web/.claude/rules/`,
   `.agents/skills/` (also `.claude/skills`).
 
