@@ -30,12 +30,12 @@ type Package struct {
 const Module = "github.com/savid/skeleton"
 
 // RepoRoot is the repository root, found from this file's location.
-func RepoRoot(t testing.TB) string {
-	t.Helper()
+func RepoRoot(tb testing.TB) string {
+	tb.Helper()
 
 	_, file, _, ok := runtime.Caller(0)
 	if !ok {
-		t.Fatal("cannot resolve the test's own path")
+		tb.Fatal("cannot resolve the test's own path")
 	}
 
 	return filepath.Clean(filepath.Join(filepath.Dir(file), "..", "..", ".."))
@@ -43,10 +43,10 @@ func RepoRoot(t testing.TB) string {
 
 // Packages lists the packages matching patterns (./... for all), with
 // their production and test imports.
-func Packages(t testing.TB, patterns ...string) []Package {
-	t.Helper()
+func Packages(tb testing.TB, patterns ...string) []Package {
+	tb.Helper()
 
-	ctx, cancel := t.Context(), func() {}
+	ctx, cancel := tb.Context(), func() {}
 	if _, has := ctx.Deadline(); !has {
 		ctx, cancel = contextWithTimeout(ctx, goListTimeout)
 	}
@@ -54,16 +54,16 @@ func Packages(t testing.TB, patterns ...string) []Package {
 
 	args := append([]string{"list", "-json=ImportPath,Imports,TestImports,XTestImports"}, patterns...)
 	cmd := exec.CommandContext(ctx, "go", args...)
-	cmd.Dir = RepoRoot(t)
+	cmd.Dir = RepoRoot(tb)
 	cmd.Env = append(cmd.Environ(), "GOWORK=off")
 
 	out, err := cmd.Output()
 	if err != nil {
 		if exitErr, ok := errors.AsType[*exec.ExitError](err); ok {
-			t.Fatalf("go %s: %v\n%s", strings.Join(args, " "), err, exitErr.Stderr)
+			tb.Fatalf("go %s: %v\n%s", strings.Join(args, " "), err, exitErr.Stderr)
 		}
 
-		t.Fatalf("go %s: %v", strings.Join(args, " "), err)
+		tb.Fatalf("go %s: %v", strings.Join(args, " "), err)
 	}
 
 	dec := json.NewDecoder(strings.NewReader(string(out)))
@@ -79,7 +79,7 @@ func Packages(t testing.TB, patterns ...string) []Package {
 		}
 
 		if err != nil {
-			t.Fatalf("decode go list output: %v", err)
+			tb.Fatalf("decode go list output: %v", err)
 		}
 
 		packages = append(packages, p)

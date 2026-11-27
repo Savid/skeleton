@@ -18,6 +18,7 @@ pnpm test:unit       # jsdom only; pnpm test:storybook for stories only
 pnpm test:coverage   # unit tests with a v8 coverage report
 pnpm storybook       # :6006
 pnpm build           # tsc -b, then vite build into dist/
+make smoke           # (repo root) the built UI served by skeletond, in Chromium
 pnpm format
 ```
 
@@ -39,6 +40,16 @@ pnpm format
 - `src/lib/`: modules without React (client setup, config, formatting,
   problems).
 - Import through `@/`, never `../`.
+- The daemon serves the page under a strict Content-Security-Policy
+  (`internal/ui`): scripts, styles, images, fonts and requests come from its
+  own origin, and nothing inline runs but the injected configuration. Import
+  assets so Vite emits them as files (`assetsInlineLimit: 0`; a `data:` URL is
+  refused); never load from a CDN or add an inline `<script>`, `<style>` or
+  `style="…"` to `index.html`. Trusted Types are enforced: `innerHTML`,
+  `eval` and the other script sinks throw (React's own rendering does not use
+  them); a library that needs one needs a named policy. The Vite dev server,
+  Vitest and Storybook apply neither policy: `make smoke` checks the built UI
+  under both, and CI runs it.
 - Test-only code (tests, stories, `src/test-utils`, `src/design-docs`,
   `src/styles/*.ts`) is excluded from `tsconfig.app.json`, from Tailwind's
   sources in `src/index.css` and from coverage in `vitest.config.ts`. A new

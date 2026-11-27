@@ -6,9 +6,16 @@ saveExact: true
 # Refuse a version published with weaker provenance than an earlier one.
 trustPolicy: no-downgrade
 
+# Refuse a version less than a day old when resolving. pnpm defaults to the
+# same age but falls back to a younger version when none is old enough, which
+# with exact pins means always; setting it makes the check strict. List a
+# package in minimumReleaseAgeExclude to take an urgent fix sooner.
+minimumReleaseAge: 1440
+
+# No dependency runs an install script. esbuild's postinstall only speeds up
+# its CLI; Vite and Storybook use its API, which is as fast without it.
 allowBuilds:
-  '@tailwindcss/oxide': true
-  esbuild: true
+  esbuild: false
 
 # Dependencies' approved agent skills are linked beside the repo's own;
 # .claude/skills links to this directory.
@@ -20,6 +27,21 @@ overrides:
   # @hey-api/json-schema-ref-parser pins js-yaml 4.2.0 exactly, which has
   # quadratic-CPU advisories fixed in 4.3.2. Drop once it moves past that.
   '@hey-api/json-schema-ref-parser>js-yaml': 4.3.2
+  # Storybook pins this docgen plugin to ^0.7.0, which takes glob 13 and so
+  # minimatch 10, both with advisories (GHSA-3g3m-2fjr-6pw4,
+  # GHSA-g3hv-75wg-m249). Its one globSync call works the same on glob 14,
+  # and Storybook loads it only for reactDocgen 'react-docgen-typescript'.
+  # Plugin 0.9.1 drops glob, but 0.8.0 on were published without provenance
+  # by a changed trusted publisher, so trustPolicy will refuse the plugin when
+  # Storybook moves past 0.7: review it then. Drop once Storybook does.
+  '@joshwooding/vite-plugin-react-docgen-typescript>glob': 14.0.6
+
+peerDependencyRules:
+  allowedVersions:
+    # typescript-eslint's experimental tsgo backend wants TypeScript 7.1 as
+    # @typescript/native; lint does not enable it, and 7.1 is not yet stable.
+    # Drop once @typescript/native is 7.1 or later.
+    '@typescript-eslint/typescript-estree>@typescript/native': '7.0'
 
 permissions:
   '@tanstack/react-router':

@@ -13,6 +13,7 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 
 	"github.com/savid/skeleton/internal/server"
@@ -33,10 +34,11 @@ func main() {
 }
 
 type options struct {
-	listen    string
-	logFormat string
-	logLevel  slog.Level
-	version   bool
+	listen       string
+	allowedHosts []string
+	logFormat    string
+	logLevel     slog.Level
+	version      bool
 }
 
 // errHelp is returned when -h or -help was given; usage has been printed.
@@ -48,6 +50,17 @@ func parse(args []string, stderr io.Writer) (options, error) {
 	fs := flag.NewFlagSet("skeletond", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.StringVar(&o.listen, "listen", "127.0.0.1:8080", "HTTP listen address")
+	fs.Func("allowed-host", "a name, besides IPs and localhost, that requests may use in Host (repeatable; .example.com allows subdomains)",
+		func(host string) error {
+			host = strings.ToLower(strings.TrimSpace(host))
+			if host == "" || host == "." || strings.ContainsAny(host, ":/ ") {
+				return errors.New("want a host name such as app.example.com or .example.com")
+			}
+
+			o.allowedHosts = append(o.allowedHosts, host)
+
+			return nil
+		})
 	fs.StringVar(&o.logFormat, "log-format", "text", "log format: text or json")
 	fs.TextVar(&o.logLevel, "log-level", o.logLevel, "log level: DEBUG, INFO, WARN or ERROR")
 	fs.BoolVar(&o.version, "version", false, "print the version and exit")
@@ -93,7 +106,9 @@ func run(args []string, stdout, stderr io.Writer) error {
 
 	log := newLogger(stderr, o).With("version", version)
 
-	srv, err := server.New(log, server.Config{Listen: o.listen, Name: name, Version: version}, assets)
+	srv, err := server.New(log, server.Config{
+		Listen: o.listen, AllowedHosts: o.allowedHosts, Name: name, Version: version,
+	}, assets)
 	if err != nil {
 		return err
 	}

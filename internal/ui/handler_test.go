@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"errors"
 	"log/slog"
 	"net/http"
@@ -112,7 +114,7 @@ func TestHandlerServesPageWithoutConfig(t *testing.T) {
 func TestInjectEscapesScriptBreakers(t *testing.T) {
 	t.Parallel()
 
-	got := string(Inject([]byte(indexHTML), []byte(`{"name":"</script><b>&"}`)))
+	got := string(inject([]byte(indexHTML), configScript([]byte(`{"name":"</script><b>&"}`))))
 
 	if strings.Contains(got, "</script><b>") {
 		t.Fatalf("script block can be closed: %s", got)
@@ -128,5 +130,58 @@ func TestHandlerRequiresIndex(t *testing.T) {
 
 	if _, err := Handler(slog.New(slog.DiscardHandler), fstest.MapFS{}, nil); err == nil {
 		t.Fatal("want an error without index.html")
+	}
+}
+
+// The page may run the injected script, found by its hash, and nothing else
+// inline; every other response gets the same policy without that script.
+func TestContentSecurityPolicy(t *testing.T) {
+	t.Parallel()
+
+	serve := func(t *testing.T, config Config, path string) *httptest.ResponseRecorder {
+		t.Helper()
+
+		h, err := Handler(slog.New(slog.DiscardHandler), testAssets, config)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		rec := httptest.NewRecorder()
+		h.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil))
+
+		return rec
+	}
+
+	t.Run("injected page allows its script", func(t *testing.T) {
+		t.Parallel()
+
+		rec := serve(t, staticConfig(`{"name":"</script>"}`), "/")
+
+		body := rec.Body.String()
+		start := strings.Index(body, "<script>") + len("<script>")
+		end := strings.Index(body, "</script>")
+		sum := sha256.Sum256([]byte(body[start:end]))
+		want := policy + "; script-src 'self' 'sha256-" + base64.StdEncoding.EncodeToString(sum[:]) + "'"
+
+		if got := rec.Header().Get("Content-Security-Policy"); got != want {
+			t.Fatalf("Content-Security-Policy = %q, want %q", got, want)
+		}
+	})
+
+	for name, tc := range map[string]struct {
+		config Config
+		path   string
+	}{
+		"page without injection": {nil, "/"},
+		"asset":                  {staticConfig(`{}`), "/favicon.svg"},
+		"missing file":           {staticConfig(`{}`), "/gone.js"},
+	} {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			if got := serve(t, tc.config, tc.path).Header().Get("Content-Security-Policy"); got != policy {
+				t.Fatalf("Content-Security-Policy = %q, want %q", got, policy)
+			}
+		})
 	}
 }

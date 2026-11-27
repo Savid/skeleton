@@ -6,13 +6,19 @@ run:
 linters:
   default: none
   enable:
+    - asasalint
+    - asciicheck
     - bidichk
     - bodyclose
+    - containedctx
+    - contextcheck
     - copyloopvar
     - cyclop
     - depguard
     - dupword
+    - durationcheck
     - errcheck
+    - errchkjson
     - errname
     - errorlint
     - exhaustive
@@ -20,30 +26,53 @@ linters:
     - fatcontext
     - forbidigo
     - funlen
+    - gocheckcompilerdirectives
+    - gochecknoinits
+    - gochecksumtype
     - gocognit
     - gocritic
+    - gomoddirectives
+    - goprintffuncname
     - gosec
     - govet
+    - iface
+    - inamedparam
     - ineffassign
     - intrange
+    - iotamixing
+    - ireturn
+    - makezero
+    - mirror
     - misspell
     - modernize
+    - nakedret
     - nestif
     - nilerr
+    - nilnesserr
+    - nilnil
     - noctx
     - nolintlint
+    - nosprintfhostport
+    - paralleltest
     - perfsprint
     - predeclared
+    - reassign
+    - recvcheck
     - revive
+    - rowserrcheck
     - sloglint
+    - spancheck
+    - sqlclosecheck
     - staticcheck
     - tagliatelle
+    - testableexamples
+    - thelper
     - tparallel
     - unconvert
-    - usetesting
     - unparam
     - unused
     - usestdlibvars
+    - usetesting
     - wastedassign
     - whitespace
 

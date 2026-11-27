@@ -26,3 +26,6 @@ node_modules/
 
 # Vitest output (failure screenshots, attachments, reports)
 /web/.vitest/
+
+# Agent worktrees (Claude Code): whole checkouts that lint and knip would scan
+/.claude/worktrees/

@@ -12,8 +12,12 @@ Clone it as a base, or lift a part below. Rules and layout:
 
 ## Quick start
 
-Go 1.27 and golangci-lint 2.15 (`.tool-versions`); Node 26 and pnpm 12
-(`package.json`).
+Go 1.27 and golangci-lint 2.15 (`.tool-versions`), and pnpm 12
+([standalone install](https://pnpm.io/installation) needs no Node). pnpm
+downloads the Node 26 that `package.json` pins (`devEngines`) and runs every
+pnpm command and `make` target with it; a bare `node` or an editor uses
+whatever is on `PATH`, and npm refuses to run in the repo on another Node.
+Behind a proxy or offline, set pnpm's `nodeDownloadMirrors`.
 
 ```bash
 pnpm install
@@ -37,9 +41,20 @@ What each does, and where it lives.
 - **Daemon.** Flags, slog (text or JSON), graceful shutdown, RFC 9457 problem
   errors. `cmd/skeletond/`, `internal/server/{server,operations}.go`,
   `web/src/lib/problem.ts`.
+- **Browser hardening.** Nothing authenticates the daemon, so it refuses what
+  a web page could abuse: a Host it was not given (DNS rebinding; IPs and
+  localhost pass, `-allowed-host` adds names) and a browser's cross-origin
+  write (`http.CrossOriginProtection`), each as a 403 problem. Every response
+  refuses sniffing, framing, cross-origin referrers and reads, and powerful
+  browser features; API answers are never cached. The page's
+  Content-Security-Policy allows same-origin resources and, by hash, the
+  injected configuration, nothing else inline, and enforces Trusted Types;
+  `make smoke` runs the built UI under it in Chromium.
+  `internal/server/security.go`, `internal/ui/handler.go`, `web/e2e/`.
+  Stdlib only.
 - **Config in the page.** `getConfig`'s JSON is injected into `index.html`;
   the UI validates it and seeds the query cache before the first render.
-  `internal/ui/handler.go` (`Inject`), `web/index.html`,
+  `internal/ui/handler.go`, `web/index.html`,
   `web/src/lib/{config,query-client}.ts`, `web/src/hooks/useConfig/`.
 - **Request IDs.** `X-Request-Id` (the proxy's or a new one) is echoed and
   added to every log line in the request; access log at debug, warn on 5xx.
@@ -55,8 +70,8 @@ What each does, and where it lives.
 - **Import boundaries.** Who may import what, as a Go test, with lint twins.
   `internal/testutil/importguard/`, `api/generation_test.go`, `.golangci.yml`
   (`depguard`, `forbidigo`).
-- **Web stack.** Vite, React 19, TypeScript, Tailwind 4, TanStack Router (file
-  routes) and Query, not-found and error pages. `web/src/{routes,pages,components}/`,
+- **Web stack.** Vite, React 19 with React Compiler, TypeScript, Tailwind 4,
+  TanStack Router (file routes) and Query, not-found and error pages. `web/src/{routes,pages,components}/`,
   `web/src/main.tsx`.
 - **Design tokens.** One `@theme` of light/dark colour pairs and sizes with
   Tailwind's defaults removed, so only tokens compile; tests check contrast in
@@ -64,14 +79,18 @@ What each does, and where it lives.
   `web/src/design-docs/`, `web/.claude/rules/styling.md`.
 - **Tests.** Go with `-race`; Vitest in jsdom; every story in Chromium under
   each colour scheme, failing on accessibility violations, console errors and
-  unmocked `/api/` calls; MSW handlers shared by both. `web/vitest.config.ts`,
-  `web/.storybook/`, `web/src/test-utils/`.
+  unmocked `/api/` calls; MSW handlers shared by both; the event stream's
+  schedule on a fake clock (`testing/synctest`); and `make smoke`, the built
+  binary's page in Chromium. `web/vitest.config.ts`, `web/.storybook/`,
+  `web/src/test-utils/`, `web/e2e/`.
 - **Lint.** golangci-lint, eslint (React Compiler, token-only classes, zero
   warnings), prettier, knip, Redocly, govulncheck, tidy check. `.golangci.yml`,
   `web/eslint.config.js`, `knip.ts`, `.redocly.yaml`.
-- **Image and CI.** Static binary on distroless, nonroot; CI runs api, go, web
-  and image jobs and builds the image without pushing it. `Dockerfile`,
-  `.github/workflows/ci.yml`.
+- **Image and CI.** Static binary on distroless, nonroot, cross-built for any
+  architecture without emulation; base images pinned by digest and actions by
+  commit, with weekly grouped Dependabot bumps (`.github/dependabot.yml`). Reached by a name (a proxy, a service name), the container needs
+  `-allowed-host <name>`. CI runs api, go, web and image jobs and builds the
+  image without pushing it. `Dockerfile`, `.github/workflows/ci.yml`.
 - **Agent guidance.** `AGENTS.md`, `web/AGENTS.md`, `web/.claude/rules/`,
   `.agents/skills/` (also `.claude/skills`).
 

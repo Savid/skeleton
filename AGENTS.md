@@ -12,6 +12,7 @@ Run `pnpm install` at the repo root first. `make help` lists every target.
 make lint test      # both sides; lint-go/test-go or lint-web/test-web for one, lint-api for the spec
 make generate       # regenerate api/rest and web/src/api from api/openapi.yaml
 make check          # lint, generate-check, test, govulncheck, tidy-check
+make smoke          # build with the real UI and check the served page in Chromium
 make fmt            # gofumpt, goimports, prettier
 make run            # build and serve on 127.0.0.1:8080 with whatever web/dist holds
 make build WEB=1    # build the binary with the real UI embedded
@@ -21,6 +22,15 @@ make build WEB=1    # build the binary with the real UI embedded
   touched.
 - `make generate-check` compares generated code with git, so it fails until
   regenerated code is committed.
+- Toolchain pins, each bumped in every place it appears: Go in `go.mod`,
+  `.tool-versions` and the `Dockerfile`; golangci-lint in `.tool-versions` and
+  CI; Node in `package.json` `devEngines.runtime` only (pnpm installs it and
+  runs every pnpm command and script with it, `make` included; CI reads it);
+  pnpm in `packageManager` (not `devEngines.packageManager`, which a global
+  pnpm 10 ignores, so it never switches) and the `Dockerfile`. Images, the
+  Dockerfile frontend included, are pinned by tag and digest, actions by
+  commit; Dependabot proposes weekly bumps of both, except the Go and pnpm
+  image versions, which move with their other pins.
 - Run Go through `make`. Run directly, Go needs `GOWORK=off` and a `web/dist`
   for `web/embed.go`: `make web-placeholder` creates a stub. Never commit
   `web/dist`.
@@ -55,6 +65,12 @@ make build WEB=1    # build the binary with the real UI embedded
   fails until every operation is served with its declared content type. To add
   an event: add its schema to the stream's response in the spec, send it from
   `internal/server/stream.go`, and handle it in `web/src/hooks/useEventStream`.
+- Before routing (`internal/server/security.go`), a request whose Host is not
+  an IP, localhost, the `-listen` host or an `-allowed-host` name is refused
+  (DNS rebinding), and so is a browser's cross-origin POST, PUT, PATCH or
+  DELETE (CSRF). Never change state on GET, HEAD or OPTIONS: those always
+  pass, and so does a WebSocket upgrade, whose handler must check `Origin`
+  itself.
 - `getConfig` is public and injected into `index.html`: nothing in it may be a
   secret or need authentication.
 - Times in the API are UTC (`.UTC()`); the client's Zod schemas reject offsets.
