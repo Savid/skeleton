@@ -131,13 +131,15 @@ func (h *handler) page(r *http.Request) ([]byte, string) {
 		return h.index, ""
 	}
 
-	return Inject(h.index, cfg), configScript(cfg)
+	script := configScript(cfg)
+
+	return inject(h.index, script), script
 }
 
-// Inject replaces Placeholder in page with a script that sets
-// window.__CONFIG__ to configJSON.
-func Inject(page, configJSON []byte) []byte {
-	return bytes.Replace(page, []byte(Placeholder), []byte("<script>"+configScript(configJSON)+"</script>"), 1)
+// inject replaces Placeholder in page with an inline script whose source is
+// script. The page's CSP must allow that script by its hash.
+func inject(page []byte, script string) []byte {
+	return bytes.Replace(page, []byte(Placeholder), []byte("<script>"+script+"</script>"), 1)
 }
 
 // configScript is the source of the script that sets window.__CONFIG__. The

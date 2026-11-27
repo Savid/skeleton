@@ -37,15 +37,17 @@ What each does, and where it lives.
 - **Daemon.** Flags, slog (text or JSON), graceful shutdown, RFC 9457 problem
   errors. `cmd/skeletond/`, `internal/server/{server,operations}.go`,
   `web/src/lib/problem.ts`.
-- **Browser hardening.** Every response refuses sniffing, framing, referrers
-  and cross-origin reads; a browser's cross-origin write is refused as a 403
-  problem (`http.CrossOriginProtection`), since nothing authenticates it. The
-  page's Content-Security-Policy allows same-origin resources and, by hash,
-  the injected configuration, nothing else inline. `internal/server/security.go`,
+- **Browser hardening.** Nothing authenticates the daemon, so it refuses what
+  a web page could abuse: a Host it was not given (DNS rebinding; IPs and
+  localhost pass, `-allowed-host` adds names) and a browser's cross-origin
+  write (`http.CrossOriginProtection`), each as a 403 problem. Every response
+  refuses sniffing, framing, cross-origin referrers and reads; the page's
+  Content-Security-Policy allows same-origin resources and, by hash, the
+  injected configuration, nothing else inline. `internal/server/security.go`,
   `internal/ui/handler.go`. Stdlib only.
 - **Config in the page.** `getConfig`'s JSON is injected into `index.html`;
   the UI validates it and seeds the query cache before the first render.
-  `internal/ui/handler.go` (`Inject`), `web/index.html`,
+  `internal/ui/handler.go`, `web/index.html`,
   `web/src/lib/{config,query-client}.ts`, `web/src/hooks/useConfig/`.
 - **Request IDs.** `X-Request-Id` (the proxy's or a new one) is echoed and
   added to every log line in the request; access log at debug, warn on 5xx.

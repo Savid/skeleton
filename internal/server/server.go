@@ -9,6 +9,8 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/ogen-go/ogen/ogenerrors"
@@ -24,6 +26,10 @@ const shutdownTimeout = 5 * time.Second
 type Config struct {
 	// Listen is the TCP address to serve on, e.g. 127.0.0.1:8080.
 	Listen string
+	// AllowedHosts are the names, besides IP addresses, localhost and the
+	// Listen host, that requests may address the daemon by: what a proxy or
+	// DNS puts in Host. A leading dot allows a domain and its subdomains.
+	AllowedHosts []string
 	// Name is the daemon's display name, reported by getConfig.
 	Name string
 	// Version is reported by the health and config endpoints.
@@ -46,6 +52,11 @@ func (c Config) withDefaults() Config {
 
 	if c.Now == nil {
 		c.Now = time.Now
+	}
+
+	// A name given to listen on is one the daemon is addressed by.
+	if host, _, err := net.SplitHostPort(c.Listen); err == nil && host != "" {
+		c.AllowedHosts = append(slices.Clone(c.AllowedHosts), strings.ToLower(host))
 	}
 
 	return c
@@ -101,9 +112,11 @@ func New(log *slog.Logger, cfg Config, assets fs.FS) (*Server, error) {
 	})
 	mux.Handle("/", app)
 
+	// Refusals carry the security headers and the request ID, and are logged.
+	handler := securityHeaders(hostCheck(log, cfg.AllowedHosts, crossOriginProtection(log, mux)))
+
 	s.http = &http.Server{
-		// Refusals are logged with their request ID and carry the headers too.
-		Handler:           withRequestID(accessLog(log, securityHeaders(crossOriginProtection(mux)))),
+		Handler:           withRequestID(accessLog(log, handler)),
 		ReadHeaderTimeout: 5 * time.Second,
 		IdleTimeout:       2 * time.Minute,
 		// No WriteTimeout: event streams are long-lived and bound each write

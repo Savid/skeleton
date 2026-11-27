@@ -114,7 +114,7 @@ func TestHandlerServesPageWithoutConfig(t *testing.T) {
 func TestInjectEscapesScriptBreakers(t *testing.T) {
 	t.Parallel()
 
-	got := string(Inject([]byte(indexHTML), []byte(`{"name":"</script><b>&"}`)))
+	got := string(inject([]byte(indexHTML), configScript([]byte(`{"name":"</script><b>&"}`))))
 
 	if strings.Contains(got, "</script><b>") {
 		t.Fatalf("script block can be closed: %s", got)

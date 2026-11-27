@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"log/slog"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -21,9 +22,16 @@ func TestParse(t *testing.T) {
 			want: options{listen: "127.0.0.1:8080", logFormat: "text", logLevel: slog.LevelInfo},
 		},
 		"everything set": {
-			args: []string{"-listen", ":9000", "-log-format", "json", "-log-level", "debug", "-version"},
-			want: options{listen: ":9000", logFormat: "json", logLevel: slog.LevelDebug, version: true},
+			args: []string{
+				"-listen", ":9000", "-allowed-host", "App.Example", "-allowed-host", ".corp.example",
+				"-log-format", "json", "-log-level", "debug", "-version",
+			},
+			want: options{
+				listen: ":9000", allowedHosts: []string{"app.example", ".corp.example"},
+				logFormat: "json", logLevel: slog.LevelDebug, version: true,
+			},
 		},
+		"bad host":    {args: []string{"-allowed-host", "app.example:8080"}, wantErr: "flags: "},
 		"bad format":  {args: []string{"-log-format", "yaml"}, wantErr: `-log-format "yaml": text or json`},
 		"bad level":   {args: []string{"-log-level", "loud"}, wantErr: "flags: "},
 		"unknown":     {args: []string{"-nope"}, wantErr: "flags: "},
@@ -41,7 +49,7 @@ func TestParse(t *testing.T) {
 				t.Fatalf("parse(%q) = %v", tc.args, err)
 			case tc.wantErr != "" && (err == nil || !strings.Contains(err.Error(), tc.wantErr)):
 				t.Fatalf("parse(%q) error = %v, want %q", tc.args, err, tc.wantErr)
-			case err == nil && got != tc.want:
+			case err == nil && !reflect.DeepEqual(got, tc.want):
 				t.Fatalf("parse(%q) = %+v, want %+v", tc.args, got, tc.want)
 			}
 		})

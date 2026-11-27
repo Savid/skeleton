@@ -41,10 +41,11 @@ pnpm format
 - Import through `@/`, never `../`.
 - The daemon serves the page under a strict Content-Security-Policy
   (`internal/ui`): scripts, styles, images, fonts and requests come from its
-  own origin, and nothing inline runs but the injected configuration. Bundle
-  assets through Vite; never load from a CDN or add an inline `<script>`,
-  `<style>` or `style="…"` to `index.html`. The Vite dev server does not apply
-  it, so check such a change with `make run`.
+  own origin, and nothing inline runs but the injected configuration. Import
+  assets so Vite emits them as files (`assetsInlineLimit: 0`; a `data:` URL is
+  refused); never load from a CDN or add an inline `<script>`, `<style>` or
+  `style="…"` to `index.html`. The Vite dev server, Vitest and Storybook do not
+  apply the policy, so check such a change in the built UI: `make run WEB=1`.
 - Test-only code (tests, stories, `src/test-utils`, `src/design-docs`,
   `src/styles/*.ts`) is excluded from `tsconfig.app.json`, from Tailwind's
   sources in `src/index.css` and from coverage in `vitest.config.ts`. A new
