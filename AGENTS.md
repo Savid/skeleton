@@ -21,6 +21,11 @@ make build WEB=1    # build the binary with the real UI embedded
   touched.
 - `make generate-check` compares generated code with git, so it fails until
   regenerated code is committed.
+- Toolchain pins, each bumped in every place it appears: Go in `go.mod`,
+  `.tool-versions` and the `Dockerfile`; golangci-lint in `.tool-versions` and
+  CI; Node in `package.json` `devEngines` only (pnpm installs it, and runs every
+  script with it; CI reads it); pnpm in `packageManager` and the `Dockerfile`.
+  Images are pinned by tag and digest, actions by commit.
 - Run Go through `make`. Run directly, Go needs `GOWORK=off` and a `web/dist`
   for `web/embed.go`: `make web-placeholder` creates a stub. Never commit
   `web/dist`.
