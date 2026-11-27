@@ -29,7 +29,8 @@ make build WEB=1    # build the binary with the real UI embedded
   pnpm in `packageManager` (not `devEngines.packageManager`, which a global
   pnpm 10 ignores, so it never switches) and the `Dockerfile`. Images, the
   Dockerfile frontend included, are pinned by tag and digest, actions by
-  commit; nothing bumps them for you.
+  commit; Dependabot proposes weekly bumps of both, except the Go and pnpm
+  image versions, which move with their other pins.
 - Run Go through `make`. Run directly, Go needs `GOWORK=off` and a `web/dist`
   for `web/embed.go`: `make web-placeholder` creates a stub. Never commit
   `web/dist`.

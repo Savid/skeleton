@@ -1,8 +1,9 @@
 # syntax=docker/dockerfile:1.29.0@sha256:572cebbc2b15e6f84c077742952674889cb63cd5e9b80abdffcbe587b6f19183
 
 # Images, this frontend included, are pinned by tag and digest, as the CI
-# actions are by commit, and nothing bumps them: update both together.
-# `docker buildx imagetools inspect <image>:<tag>` prints a tag's digest.
+# actions are by commit. Dependabot proposes the base images' bumps weekly;
+# the Go and pnpm versions, and this frontend, are bumped by hand with their
+# other pins. `docker buildx imagetools inspect <image>:<tag>` prints a digest.
 
 # The web and go stages run on the build machine whatever the target: the UI
 # is the same files everywhere and Go cross-compiles, so building for another

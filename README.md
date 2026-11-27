@@ -88,7 +88,7 @@ What each does, and where it lives.
   `web/eslint.config.js`, `knip.ts`, `.redocly.yaml`.
 - **Image and CI.** Static binary on distroless, nonroot, cross-built for any
   architecture without emulation; base images pinned by digest and actions by
-  commit. Reached by a name (a proxy, a service name), the container needs
+  commit, with weekly grouped Dependabot bumps (`.github/dependabot.yml`). Reached by a name (a proxy, a service name), the container needs
   `-allowed-host <name>`. CI runs api, go, web and image jobs and builds the
   image without pushing it. `Dockerfile`, `.github/workflows/ci.yml`.
 - **Agent guidance.** `AGENTS.md`, `web/AGENTS.md`, `web/.claude/rules/`,
